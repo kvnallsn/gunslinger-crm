@@ -167,6 +167,7 @@ class Contact {
 
 	asForm(): ContactForm {
 		return {
+			id: this.id,
 			lastName: this.last_name,
 			firstName: this.first_name,
 			title: this.title,
@@ -180,8 +181,21 @@ class Contact {
 
 	async save(client: SqlClient) {
 		// update contact record
-		await client.query(
-			'INSERT INTO contacts (id, last_name, first_name, grade, location, org, title, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+		await client.query(`
+			INSERT INTO
+				contacts (id, last_name, first_name, grade, location, org, title, metadata)
+			VALUES
+				($1, $2, $3, $4, $5, $6, $7, $8)
+			ON CONFLICT(id) DO UPDATE
+			SET
+				last_name = EXCLUDED.last_name,
+				first_name = EXCLUDED.first_name,
+				grade = EXCLUDED.grade,
+				location = EXCLUDED.location,
+				org = EXCLUDED.org,
+				title = EXCLUDED.title,
+				metadata = EXCLUDED.metadata
+			`,
 			[
 				this.id,
 				this.last_name,

@@ -18,7 +18,7 @@ export default async function handler(
 
         contacts = await Contact.fetchAll(db);
     } catch (error: any) {
-        console.log('error');
+        console.error(error);
         await db?.query('ROLLBACK');
     } finally {
         db?.release()

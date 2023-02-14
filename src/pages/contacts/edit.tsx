@@ -45,15 +45,15 @@ export async function getServerSideProps({ query }: GetServerSidePropsContext) {
             EmailSystem.fetchAll(db),
         ])
 
+        orgs = [new Organization('', BLANK_UUID), ...orgs];
+        locations = [new Location('', '', BLANK_UUID), ...locations];
+
         if ('id' in query) {
             // attempt to fetch existing contact
             const c = await Contact.fetch(db, String(query['id']));
             form = c.asForm()
         } else {
             // creating a new contact
-            orgs = [new Organization('', BLANK_UUID), ...orgs];
-            locations = [new Location('', '', BLANK_UUID), ...locations];
-
             form.grade = grades[0].toJSON();
             form.org = orgs[0].toJSON();
             form.location = locations[0].toJSON();
@@ -185,6 +185,13 @@ export default function EditContact({ grades, orgs, locations, systems, networks
             </Backdrop>
             <Paper elevation={3} sx={{ margin: 2, padding: 2 }}>
                 <form onSubmit={handleSubmit(onSubmit, onError)}>
+                    <Controller
+                        name="id"
+                        control={control}
+                        render={({ field: { value } }) => (
+                            <input type="hidden" value={value} />
+                        )}
+                    />
                     <Grid container spacing={{ xs: 2, md: 3 }}>
                         <Grid item xs={12} sm={2}>
                             <Controller

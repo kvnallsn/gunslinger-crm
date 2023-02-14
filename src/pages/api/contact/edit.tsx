@@ -78,13 +78,12 @@ export default async function handler(
             tags: [],
         });
 
-        console.log(contact);
         await contact.save(db);
         await commitTranscation(db);
 
         res.status(201).json({ name: 'John Doe' })
     } catch (error: any) {
-        console.log(error);
+        console.error(error);
 
         await rollbackTransaction(db);
 
