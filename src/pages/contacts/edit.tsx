@@ -1,6 +1,7 @@
 import { useState } from "react";
-import useDatabase, { SqlClient } from "@/lib/db";
-import { Grade, Organization, Location, IContactPhone, PhoneSystem, EmailSystem } from "@/lib/models";
+import Link from 'next/link';
+import { SqlClient, dbConnect } from "@/lib/db";
+import { Grade, Organization, Location, Contact, PhoneSystem, EmailSystem } from "@/lib/models";
 import { ContactForm, ContactFormSchema, NewContactForm } from "@/lib/forms";
 import { BLANK_UUID } from "@/lib/utils";
 import { useForm, useFieldArray, SubmitHandler, Controller } from 'react-hook-form';
@@ -12,6 +13,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { GetServerSidePropsContext } from "next";
 
 
 type Props = {
@@ -23,7 +25,7 @@ type Props = {
     form: ContactForm
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps({ query }: GetServerSidePropsContext) {
     let db: SqlClient | undefined;
     let grades: Grade[] = [];
     let orgs: Organization[] = [];
@@ -33,7 +35,7 @@ export async function getServerSideProps() {
     let form: ContactForm = NewContactForm();
 
     try {
-        db = await useDatabase();
+        db = await dbConnect();
 
         [grades, orgs, locations, systems, networks] = await Promise.all([
             Grade.fetchAll(db),
@@ -43,12 +45,19 @@ export async function getServerSideProps() {
             EmailSystem.fetchAll(db),
         ])
 
-        orgs = [new Organization('', BLANK_UUID), ...orgs];
-        locations = [new Location('', '', BLANK_UUID), ...locations];
+        if ('id' in query) {
+            // attempt to fetch existing contact
+            const c = await Contact.fetch(db, String(query['id']));
+            form = c.asForm()
+        } else {
+            // creating a new contact
+            orgs = [new Organization('', BLANK_UUID), ...orgs];
+            locations = [new Location('', '', BLANK_UUID), ...locations];
 
-        form.grade = grades[0].toJSON();
-        form.org = orgs[0].toJSON();
-        form.location = locations[0].toJSON();
+            form.grade = grades[0].toJSON();
+            form.org = orgs[0].toJSON();
+            form.location = locations[0].toJSON();
+        }
     } catch (error: any) {
         console.error(error);
     } finally {
@@ -157,7 +166,9 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                                 <Typography variant="subtitle1">Contact Saved</Typography>
                                 <Box sx={{ display: 'flex', columnGap: '1em' }}>
                                     <Button variant="outlined" onClick={() => resetForm()}>Create Another</Button>
-                                    <Button variant="contained" href="/contacts">Go to Contacts</Button>
+                                    <Link href="/contacts">
+                                        <Button variant="contained">Go to Contacts</Button>
+                                    </Link>
                                 </Box>
                             </>
                         }

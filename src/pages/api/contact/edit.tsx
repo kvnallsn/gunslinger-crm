@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import useDatabase, { beginTransation, commitTranscation, rollbackTransaction, SqlClient } from '@/lib/db'
+import { dbConnect, beginTransation, commitTranscation, rollbackTransaction, SqlClient } from '@/lib/db'
 import { ContactForm, ContactFormSchema } from '@/lib/forms';
 import { Contact, Grade, Location, Organization } from '@/lib/models';
 import { BLANK_UUID } from '@/lib/utils';
@@ -36,7 +36,7 @@ export default async function handler(
 
     try {
         const form: ContactForm = await ContactFormSchema.validate(req.body);
-        db = await useDatabase();
+        db = await dbConnect();
         await beginTransation(db);
 
         let grade: Grade;

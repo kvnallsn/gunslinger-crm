@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import Link from 'next/link';
 import { Button, ButtonGroup, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
@@ -36,7 +37,9 @@ export default function SplitButton() {
     return (
         <>
             <ButtonGroup variant="contained" ref={anchorRef} aria-label="create items button">
-                <Button href={options[selectedIndex].link}>Create {options[selectedIndex].display}</Button>
+                <Link href={options[selectedIndex].link}>
+                    <Button>Create {options[selectedIndex].display}</Button>
+                </Link>
                 <Button
                     size='small'
                     aria-controls={open ? 'create-items-menu' : undefined}
@@ -69,7 +72,7 @@ export default function SplitButton() {
                                 <MenuList id="create-items-menu" autoFocusItem>
                                     {options.map((option, idx) => (
                                         <MenuItem
-                                            key={option.display}
+                                            key={`action-${option.display}`}
                                             selected={idx === selectedIndex}
                                             onClick={event => handleMenuItemClick(event, idx)}
                                         >

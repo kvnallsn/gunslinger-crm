@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer } from "@mui/material";
+import Link from 'next/link';
 import SplitButton from "./splitbutton";
+import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 
 const drawerWidth = 240;
 
 const routes = [
     { display: 'Home', route: '/' },
-    { display: 'Contacts', route: '/contacts '},
+    { display: 'Contacts', route: '/contacts ' },
 ];
 
 export default function Navbar() {
@@ -25,7 +26,7 @@ export default function Navbar() {
             <Divider />
             <List>
                 {routes.map(item => (
-                    <ListItem key={item.display} disablePadding>
+                    <ListItem key={`drawer-${item.display}`} disablePadding>
                         <ListItemButton sx={{ textAlign: 'center' }} href={item.route}>
                             <ListItemText primary={item.display} />
                         </ListItemButton>
@@ -51,11 +52,13 @@ export default function Navbar() {
                     <Typography variant='h6' component='div' sx={{ display: 'block' }}>
                         GunslingerCRM
                     </Typography>
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block'} }}>
+                    <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
                         {routes.map(item => (
-                            <Button key={item.display} href={item.route} sx={{ color: '#fff'}}>
-                                {item.display}
-                            </Button>
+                            <Link key={item.display} href={item.route}>
+                                <Button sx={{ color: '#fff' }}>
+                                    {item.display}
+                                </Button>
+                            </Link>
                         ))}
                     </Box>
                     <Box sx={{ display: { xs: 'none', sm: 'block' } }}>

@@ -17,7 +17,7 @@ const ContactPhoneSchema = object().shape({
 		.optional()
 });
 
-interface IContactPhone extends InferType<typeof ContactPhoneSchema> {}
+interface IContactPhone extends InferType<typeof ContactPhoneSchema> { }
 
 const ContactEmailSchema = object().shape({
 	system: string()
@@ -32,7 +32,7 @@ const ContactEmailSchema = object().shape({
 		.optional()
 });
 
-interface IContactEmail extends InferType<typeof ContactEmailSchema> {}
+interface IContactEmail extends InferType<typeof ContactEmailSchema> { }
 
 interface IContactSocial {
 	service: string;
@@ -115,7 +115,7 @@ class Contact {
 		this.title = title;
 		this.emails = emails;
 		this.phones = phones,
-		this.socials = socials;
+			this.socials = socials;
 		this.tags = tags;
 	}
 
@@ -150,7 +150,7 @@ class Contact {
 	}
 
 	toJSON() {
-		return { 
+		return {
 			id: this.id,
 			last_name: this.last_name,
 			first_name: this.first_name,
@@ -170,9 +170,9 @@ class Contact {
 			lastName: this.last_name,
 			firstName: this.first_name,
 			title: this.title,
-			grade: this.grade.id,
-			location: this.location.id,
-			org: this.organization.id,
+			grade: this.grade.toJSON(),
+			location: this.location.toJSON(),
+			org: this.organization.toJSON(),
 			phones: this.phones,
 			emails: this.emails
 		}
