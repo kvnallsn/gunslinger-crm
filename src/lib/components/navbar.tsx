@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Link from 'next/link';
 import SplitButton from "./splitbutton";
-import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer } from "@mui/material";
+import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer, ButtonGroup } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 
 const drawerWidth = 240;
@@ -61,8 +61,9 @@ export default function Navbar() {
                             </Link>
                         ))}
                     </Box>
-                    <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                    <Box sx={{ display: { xs: 'none', sm: 'flex', columnGap: '1em' } }}>
                         <SplitButton />
+                        <Button variant="contained">Logout</Button>
                     </Box>
                 </Toolbar>
             </AppBar>

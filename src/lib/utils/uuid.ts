@@ -1,3 +1,2 @@
 const BLANK_UUID: string = "00000000-0000-0000-0000-000000000000";
-
-export { BLANK_UUID };
+export default BLANK_UUID;

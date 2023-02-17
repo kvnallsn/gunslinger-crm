@@ -3,32 +3,19 @@ import { dbConnect, beginTransation, commitTranscation, rollbackTransaction, Sql
 import { ContactForm, ContactFormSchema } from '@/lib/forms';
 import { Contact, Grade, Location, Organization } from '@/lib/models';
 import { BLANK_UUID } from '@/lib/utils';
-
-type Error = {
-    code: number;
-    msg: string;
-}
+import { err, checkPost, AppError } from '@/lib/utils/api';
 
 type Data = {
     name: string
 }
 
-function err(res: NextApiResponse<Error>, code: number, msg: string) {
-    res.status(code).json({ code, msg })
-}
-
-
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data | Error>
+    res: NextApiResponse<Data | AppError>
 ) {
-    if (req.method !== "POST") {
-        err(res, 405, 'Method Not Allowed');
-        return;
-    }
-
-    if (req.body === null || req.body === undefined) {
-        err(res, 400, 'Bad Request');
+    const e = checkPost(req);
+    if (e) {
+        err(res, e.code, e.msg);
         return;
     }
 

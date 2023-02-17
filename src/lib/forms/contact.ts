@@ -1,6 +1,5 @@
 import { object, string, InferType, array, Schema } from 'yup';
 import { ContactEmailSchema, ContactPhoneSchema } from '../models/contact';
-import { BLANK_UUID } from '../utils';
 
 const ContactFormSchema = object().shape({
     id: string()
