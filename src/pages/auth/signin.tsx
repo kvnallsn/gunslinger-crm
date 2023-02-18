@@ -9,11 +9,13 @@ import { Alert, Button, Container, Grid, IconButton, InputAdornment, Paper, Text
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRouter } from 'next/router'
+import { useSession } from '@/lib/components/session'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Home() {
+export default function SignIn() {
   const router = useRouter();
+  const { setSession } = useSession();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const handleClickShowPassword = () => setShowPassword(show => !show);
@@ -22,6 +24,12 @@ export default function Home() {
   };
 
   const [error, setError] = useState<boolean>(false);
+
+  const nextUrl = Array.isArray(router.query.from) ? router.query.from[0] : router.query.from;
+  if (nextUrl) {
+    // we're signed out, update session
+    //setSession({ auth: false });
+  }
 
   // form delcaration
   const { handleSubmit, control } = useForm<LoginForm>({
@@ -33,26 +41,28 @@ export default function Home() {
     resolver: yupResolver(LoginFormSchema)
   });
 
-  const onSubmit: SubmitHandler<LoginForm> = data => {
+  const onSubmit: SubmitHandler<LoginForm> = async data => {
     setError(false);
-    fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-      .then(r => {
-        if (r.ok) {
-          console.log('success!');
-        } else {
-          setError(true);
-        }
-      })
-      .catch(e => {
-        setError(true);
-        console.error(e);
+    try {
+      const resp = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(data)
       });
+
+      if (!resp.ok) {
+        throw new Error(`${resp.status}: ${resp.statusText}`);
+      }
+
+      setSession({ auth: true });
+
+      router.push(nextUrl ? nextUrl : '/');
+    } catch (err: any) {
+      setError(true);
+      console.error(err);
+    }
   };
 
   return (

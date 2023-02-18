@@ -3,6 +3,8 @@ import Link from 'next/link';
 import SplitButton from "./splitbutton";
 import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer, ButtonGroup } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
+import { useSession } from "./session";
+import { useRouter } from "next/router";
 
 const drawerWidth = 240;
 
@@ -12,6 +14,8 @@ const routes = [
 ];
 
 export default function Navbar() {
+    const { session, setSession } = useSession();
+    const router = useRouter();
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleDrawerToggle = () => {
@@ -35,6 +39,25 @@ export default function Navbar() {
             </List>
         </Box>
     );
+
+    const logout = async () => {
+        try {
+            const resp = await fetch(`/api/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (!resp.ok) {
+                throw new Error(`${resp.status}: ${resp.statusText}`);
+            }
+
+            setSession({ auth: false });
+
+            router.push('/auth/signin');
+        } catch (err: any) {
+            console.error(err);
+        }
+    };
 
     return (
         <>
@@ -62,8 +85,14 @@ export default function Navbar() {
                         ))}
                     </Box>
                     <Box sx={{ display: { xs: 'none', sm: 'flex', columnGap: '1em' } }}>
-                        <SplitButton />
-                        <Button variant="contained">Logout</Button>
+                        {session.auth ?
+                            <>
+                                <SplitButton />
+                                <Button variant="contained" onClick={logout}>Logout</Button>
+                            </>
+                            :
+                            <Button variant="contained" href="/auth/signin">Login</Button>
+                        }
                     </Box>
                 </Toolbar>
             </AppBar>

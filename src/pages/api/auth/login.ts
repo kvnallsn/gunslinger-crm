@@ -29,8 +29,7 @@ export default async function handler(
     if (await argon2.verify(hashed, form.password)) {
         // TODO create session
         let session = Session.create(user);
-        await session.save();
-        session.setCookie(res);
+        await session.save(res);
 
         res.status(200).json({});
     } else {
