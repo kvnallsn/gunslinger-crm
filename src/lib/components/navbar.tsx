@@ -79,13 +79,13 @@ export default function Navbar() {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant='h6' component='div' sx={{ display: 'block' }}>
+                    <Typography variant='h6' component='div' sx={{ display: 'block', mr: 2 }}>
                         GunslingerCRM
                     </Typography>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
                         {isAuthenticated && routes.map(item => (
                             <Link key={item.display} href={item.route}>
-                                <Button sx={{ color: '#fff' }}>
+                                <Button sx={{ my: 2, color: 'inherit' }}>
                                     {item.display}
                                 </Button>
                             </Link>
