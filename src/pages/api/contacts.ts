@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Contact } from '@/lib/models';
-import { dbConnect } from '@/lib/db'
+import { getDatabaseConn } from '@/lib/db'
 import { PoolClient } from 'pg';
 
 type Data = Contact[];
@@ -12,8 +12,7 @@ export default async function handler(
     let db: PoolClient | undefined = undefined;
     let contacts: Contact[] = [];
     try {
-        db = await dbConnect();
-
+        db = await getDatabaseConn();
         contacts = await Contact.fetchAll(db);
     } catch (error: any) {
         console.error(error);

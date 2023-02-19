@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Link from 'next/link';
-import { SqlClient, dbConnect } from "@/lib/db";
+import { SqlClient, getDatabaseConn } from "@/lib/db";
 import { Grade, Organization, Location, Contact, PhoneSystem, EmailSystem } from "@/lib/models";
 import { ContactForm, ContactFormSchema, NewContactForm } from "@/lib/forms";
 import { BLANK_UUID } from "@/lib/utils";
@@ -35,7 +35,7 @@ export async function getServerSideProps({ query }: GetServerSidePropsContext) {
     let form: ContactForm = NewContactForm();
 
     try {
-        db = await dbConnect();
+        db = await getDatabaseConn();
 
         [grades, orgs, locations, systems, networks] = await Promise.all([
             Grade.fetchAll(db),

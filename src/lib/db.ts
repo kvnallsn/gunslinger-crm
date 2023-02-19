@@ -8,22 +8,23 @@ const pool = new Pool({
     max: 20,
 })
 
-async function dbConnect(): Promise<PoolClient> {
+async function getDatabaseConn(): Promise<PoolClient> {
     return await pool.connect();
 }
 
-async function beginTransation(db: PoolClient) {
-    await db.query("BEGIN");
-}
-
-async function rollbackTransaction(db: PoolClient | undefined) {
-    if (db !== undefined) {
-        await db.query("ROLLBACK");
+async function runDatabaseTx<T>(fn: (db: SqlClient) => Promise<T>) {
+    const db = await getDatabaseConn();
+    await db.query('BEGIN');
+    try {
+        const val: T = await fn(db);
+        await db.query('COMMIT');
+        db.release();
+        return val;
+    } catch (error: any) {
+        await db.query('ROLLBACK');
+        db.release();
+        throw error;
     }
-}
-
-async function commitTranscation(db: PoolClient) {
-    await db.query("COMMIT");
 }
 
 async function createSessionClient() {
@@ -37,5 +38,5 @@ async function createSessionClient() {
 }
 
 
-export { pool, dbConnect, beginTransation, rollbackTransaction, commitTranscation, createSessionClient };
+export { pool, getDatabaseConn, runDatabaseTx, createSessionClient };
 export type { SqlClient };

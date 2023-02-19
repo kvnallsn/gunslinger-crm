@@ -93,7 +93,7 @@ export default function Navbar() {
                     </Box>
                     <Box sx={{ display: { xs: 'none', sm: 'flex', columnGap: '1em' } }}>
                         {isAuthenticated ?
-                            <ButtonGroup variant="contained">
+                            <ButtonGroup color='inherit'>
                                 <Button
                                     id="create-button"
                                     aria-controls={createMenuOpen ? 'create-menu' : undefined}
