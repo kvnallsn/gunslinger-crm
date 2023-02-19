@@ -5,7 +5,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 const options = [
     { display: 'Contact', link: '/contacts/edit' },
-    { display: 'Organization', link: '/orgs/edit' },
+    { display: 'Engagement', link: '/engagements/edit' },
     { display: 'Location', link: '/locations/edit' },
 ];
 

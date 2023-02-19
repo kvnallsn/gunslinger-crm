@@ -3,9 +3,7 @@ import { Contact } from '@/lib/models';
 import { dbConnect } from '@/lib/db'
 import { PoolClient } from 'pg';
 
-type Data = {
-    contacts: Contact[]
-}
+type Data = Contact[];
 
 export default async function handler(
     req: NextApiRequest,
@@ -24,5 +22,5 @@ export default async function handler(
         db?.release()
     }
 
-    res.status(200).json({ contacts: contacts })
+    res.status(200).json(contacts);
 }

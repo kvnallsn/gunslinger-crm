@@ -1,10 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from 'next/link';
-import SplitButton from "./splitbutton";
-import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer, ButtonGroup } from "@mui/material";
+import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer, ButtonGroup, Menu, MenuItem } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
-import { useSession } from "./session";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useRouter } from "next/router";
+import { signOut, useSession } from "next-auth/react";
 
 const drawerWidth = 240;
 
@@ -14,13 +14,30 @@ const routes = [
 ];
 
 export default function Navbar() {
-    const { session, setSession } = useSession();
     const router = useRouter();
+    const { data: session, status } = useSession();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [createAnchorEl, setCreateAnchorEl] = useState<HTMLElement | null>(null);
+    const createMenuOpen = Boolean(createAnchorEl);
 
     const handleDrawerToggle = () => {
         setMobileOpen(open => !open);
     };
+
+    const handleCreateMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setCreateAnchorEl(event.currentTarget);
+    };
+
+    const handleCreateMenuClose = () => {
+        setCreateAnchorEl(null);
+    };
+
+    const navigate = (url: string) => {
+        handleCreateMenuClose();
+        router.push(url);
+    };
+
+    const isAuthenticated = status === 'authenticated';
 
     const drawer = (
         <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
@@ -42,18 +59,8 @@ export default function Navbar() {
 
     const logout = async () => {
         try {
-            const resp = await fetch(`/api/auth/logout`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-
-            if (!resp.ok) {
-                throw new Error(`${resp.status}: ${resp.statusText}`);
-            }
-
-            setSession({ auth: false });
-
-            router.push('/auth/signin');
+            const data = await signOut({ redirect: false, callbackUrl: "/auth/signin" });
+            router.push(data.url);
         } catch (err: any) {
             console.error(err);
         }
@@ -76,7 +83,7 @@ export default function Navbar() {
                         GunslingerCRM
                     </Typography>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
-                        {routes.map(item => (
+                        {isAuthenticated && routes.map(item => (
                             <Link key={item.display} href={item.route}>
                                 <Button sx={{ color: '#fff' }}>
                                     {item.display}
@@ -85,11 +92,40 @@ export default function Navbar() {
                         ))}
                     </Box>
                     <Box sx={{ display: { xs: 'none', sm: 'flex', columnGap: '1em' } }}>
-                        {session.auth ?
-                            <>
-                                <SplitButton />
-                                <Button variant="contained" onClick={logout}>Logout</Button>
-                            </>
+                        {isAuthenticated ?
+                            <ButtonGroup variant="contained">
+                                <Button
+                                    id="create-button"
+                                    aria-controls={createMenuOpen ? 'create-menu' : undefined}
+                                    aria-haspopup="true"
+                                    aria-expanded={createMenuOpen ? 'true' : undefined}
+                                    onClick={handleCreateMenuClick}
+                                    endIcon={<KeyboardArrowDownIcon />}
+                                >
+                                    Create
+                                </Button>
+                                <Menu
+                                    id="create-menu"
+                                    anchorEl={createAnchorEl}
+                                    open={createMenuOpen}
+                                    onClose={handleCreateMenuClose}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right'
+                                    }}
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right'
+                                    }}
+                                    MenuListProps={{
+                                        'aria-labelledby': 'create-button'
+                                    }}
+                                >
+                                    <MenuItem onClick={() => navigate('/contacts/edit')}>Contact</MenuItem>
+                                    <MenuItem onClick={() => navigate('/engagements/edit')}>Engagement</MenuItem>
+                                </Menu>
+                                <Button onClick={logout}>Logout</Button>
+                            </ButtonGroup>
                             :
                             <Button variant="contained" href="/auth/signin">Login</Button>
                         }

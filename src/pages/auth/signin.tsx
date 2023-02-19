@@ -1,22 +1,16 @@
 import React, { useState } from 'react'
 import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { LoginForm, LoginFormSchema } from '@/lib/forms'
 import { Alert, Button, Container, Grid, IconButton, InputAdornment, Paper, TextField, Typography } from '@mui/material'
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
-import { useSession } from '@/lib/components/session'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export default function SignIn() {
   const router = useRouter();
-  const { setSession } = useSession();
-
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const handleClickShowPassword = () => setShowPassword(show => !show);
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -24,12 +18,6 @@ export default function SignIn() {
   };
 
   const [error, setError] = useState<boolean>(false);
-
-  const nextUrl = Array.isArray(router.query.from) ? router.query.from[0] : router.query.from;
-  if (nextUrl) {
-    // we're signed out, update session
-    //setSession({ auth: false });
-  }
 
   // form delcaration
   const { handleSubmit, control } = useForm<LoginForm>({
@@ -44,21 +32,24 @@ export default function SignIn() {
   const onSubmit: SubmitHandler<LoginForm> = async data => {
     setError(false);
     try {
-      const resp = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(data)
+      const r = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false,
       });
 
-      if (!resp.ok) {
-        throw new Error(`${resp.status}: ${resp.statusText}`);
+      if (r && r.ok) {
+        let next = '/';
+        if (r.url) {
+          const n = new URL(r.url);
+          next = n.searchParams.get('callbackURL') || '/';
+        }
+
+        router.push(next);
+      } else {
+        throw new Error(r ? r.error : 'authentication failed');
       }
 
-      setSession({ auth: true });
-
-      router.push(nextUrl ? nextUrl : '/');
     } catch (err: any) {
       setError(true);
       console.error(err);

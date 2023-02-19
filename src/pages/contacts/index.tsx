@@ -13,6 +13,7 @@ import { DataGrid, GridActionsCellItem, GridColumns, GridRowParams, GridToolbar 
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import EditIcon from '@mui/icons-material/Edit';
 import { GetServerSidePropsContext } from "next";
+import { useContacts } from "@/lib/utils/hooks";
 
 export async function getServerSideProps({ req, res }: GetServerSidePropsContext) {
     return {
@@ -22,9 +23,7 @@ export async function getServerSideProps({ req, res }: GetServerSidePropsContext
 
 export default function Contacts() {
     const router = useRouter();
-    const [contacts, setContacts] = useState<Contact[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<boolean>(false);
+    const { contacts, loading, error } = useContacts();
 
     const columns: GridColumns<Contact> = [
         { field: 'last_name', headerName: 'Last Name', flex: 1 },
@@ -51,33 +50,24 @@ export default function Contacts() {
         },
     ];
 
-    useEffect(() => {
-        setLoading(true);
-        setError(false);
-        fetch('/api/contacts')
-            .then(res => res.json())
-            .then(data => setContacts(data.contacts))
-            .catch(reason => {
-                console.error(reason);
-                setError(true);
-            })
-            .finally(() => setLoading(false));
-    }, []);
-
     return (
         <Box sx={{ height: '100%' }}>
-            <DataGrid
-                rows={contacts}
-                columns={columns}
-                loading={loading}
-                components={{ Toolbar: GridToolbar }}
-                componentsProps={{
-                    toolbar: {
-                        showQuickFilter: true,
-                        quickFilterProps: { debounceMs: 500 },
-                    }
-                }}
-            />
+            {contacts ?
+                <DataGrid
+                    rows={contacts}
+                    columns={columns}
+                    loading={loading}
+                    components={{ Toolbar: GridToolbar }}
+                    componentsProps={{
+                        toolbar: {
+                            showQuickFilter: true,
+                            quickFilterProps: { debounceMs: 500 },
+                        }
+                    }}
+                />
+                :
+                <Box></Box>
+            }
         </Box>
     )
 }
