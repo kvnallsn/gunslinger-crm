@@ -138,6 +138,11 @@ class Contact {
 		}
 	}
 
+	static async fetchMany(client: SqlClient, ids: string[]): Promise<Contact[]> {
+		const contacts = await client.query("SELECT * FROM contact_details WHERE id = ANY($1::uuid[])", [ids]);
+		return contacts.rows.map(r => this.fromInterface(r));
+	}
+
 	static async fetchAll(client: SqlClient) {
 		const contacts = await client.query('SELECT * FROM contact_details');
 		return contacts.rows.map(Contact.fromInterface);

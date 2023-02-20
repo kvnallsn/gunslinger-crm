@@ -33,8 +33,23 @@ export default function EditEngagement({ engagements }: Props) {
         resolver: yupResolver(EngagementFormSchema)
     });
 
-    const onSubmit: SubmitHandler<EngagementForm> = data => {
+    const onSubmit: SubmitHandler<EngagementForm> = async data => {
         console.log(data);
+
+        const resp = await fetch(`/api/engagement/save`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (resp.ok) {
+            console.log('success!');
+        } else {
+            console.error(resp.statusText);
+        }
     };
 
     const onError: SubmitErrorHandler<EngagementForm> = e => console.error(e);

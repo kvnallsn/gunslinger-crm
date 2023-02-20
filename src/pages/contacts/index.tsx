@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { useRouter } from 'next/router';
 
 // Local
@@ -12,14 +12,7 @@ import { DataGrid, GridActionsCellItem, GridColumns, GridRowParams, GridToolbar 
 // Icons
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import EditIcon from '@mui/icons-material/Edit';
-import { GetServerSidePropsContext } from "next";
 import { useContacts } from "@/lib/utils/hooks";
-
-export async function getServerSideProps({ req, res }: GetServerSidePropsContext) {
-    return {
-        props: {}
-    }
-}
 
 export default function Contacts() {
     const router = useRouter();

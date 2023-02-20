@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { Contact } from '../models';
+import { Contact, Engagement } from '../models';
 const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
 
 function useContacts() {
@@ -9,7 +9,17 @@ function useContacts() {
         contacts: data,
         loading: isLoading,
         error: error
-    }
+    };
 }
 
-export { useContacts };
+function useEngagements() {
+    const { data, error, isLoading } = useSWR<Engagement[]>(`/api/engagements`, fetcher);
+
+    return {
+        engagements: data,
+        loading: isLoading,
+        error: error
+    };
+}
+
+export { useContacts, useEngagements };

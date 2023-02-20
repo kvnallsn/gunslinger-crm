@@ -16,7 +16,8 @@ const EngagementFormSchema = object().shape({
         .required('An engagment type is required'),
 
     contacts: array()
-        .of(string().uuid()),
+        .required('at least on contact must be specified')
+        .of(string().required().uuid()),
 
     notes: string()
         .optional()

@@ -11,6 +11,7 @@ const drawerWidth = 240;
 const routes = [
     { display: 'Home', route: '/' },
     { display: 'Contacts', route: '/contacts ' },
+    { display: 'Engagements', route: '/engagements' },
 ];
 
 export default function Navbar() {
