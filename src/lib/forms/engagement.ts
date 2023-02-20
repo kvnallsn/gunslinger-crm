@@ -1,4 +1,3 @@
-import { Engagement } from '@next/font/google';
 import { object, string, InferType, array, Schema, date } from 'yup';
 
 const EngagementFormSchema = object().shape({
@@ -15,16 +14,23 @@ const EngagementFormSchema = object().shape({
 
     ty: string()
         .required('An engagment type is required'),
+
+    contacts: array()
+        .of(string().uuid()),
+
+    notes: string()
+        .optional()
 });
 
 type EngagementForm = InferType<typeof EngagementFormSchema>;
 
 function NewEngagementForm(ty: string): EngagementForm {
     return {
-        id: '',
         topic: '',
         date: new Date(),
         ty: ty,
+        contacts: [],
+        notes: '',
     }
 }
 

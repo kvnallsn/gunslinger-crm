@@ -127,7 +127,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
     };
 
     const closePhoneMenu = (system: string) => {
-        phones.append({ key: "1", system: system, number: "" });
+        phones.append({ system: system, number: "" });
         setPhoneMenuAnchor(null);
     };
 
@@ -136,7 +136,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
     };
 
     const closeEmailMenu = (system: string) => {
-        emails.append({ key: "1", system: system, address: "" });
+        emails.append({ system: system, address: "" });
         setEmailMenuAnchor(null);
     };
 

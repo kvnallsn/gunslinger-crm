@@ -12,9 +12,6 @@ const ContactPhoneSchema = object().shape({
 	number: string()
 		.required()
 		.min(7, 'Phone number must be at least 7 characters'),
-
-	key: string()
-		.optional()
 });
 
 interface IContactPhone extends InferType<typeof ContactPhoneSchema> { }
@@ -27,9 +24,6 @@ const ContactEmailSchema = object().shape({
 	address: string()
 		.required()
 		.email('Address must be an email address'),
-
-	key: string()
-		.optional()
 });
 
 interface IContactEmail extends InferType<typeof ContactEmailSchema> { }

@@ -59,8 +59,7 @@ export default async function handler(
 ) {
     const e = checkPost(req);
     if (e) {
-        err(res, e.code, e.msg);
-        return;
+        return err(res, e.code, e.msg);
     }
 
     try {

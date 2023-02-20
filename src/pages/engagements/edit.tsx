@@ -5,9 +5,10 @@ import { Autocomplete, Box, Button, Checkbox, Grid, Paper, TextField } from "@mu
 import { DatePicker } from "@mui/x-date-pickers";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useForm, useFieldArray, SubmitHandler, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, SubmitHandler, Controller, SubmitErrorHandler } from 'react-hook-form';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { Contact } from "@/lib/models";
 
 type Props = {
     engagements: string[];
@@ -16,7 +17,7 @@ type Props = {
 export function getServerSideProps() {
     return {
         props: {
-            engagements: ['Phone', 'Email', 'Meeting', 'Conference'],
+            engagements: ['Phone', 'Email', 'Text / SMS', 'Meeting', 'Conference'],
         }
     }
 }
@@ -36,10 +37,12 @@ export default function EditEngagement({ engagements }: Props) {
         console.log(data);
     };
 
+    const onError: SubmitErrorHandler<EngagementForm> = e => console.error(e);
+
     return (
         <Box maxWidth='lg' sx={{ width: '100%', height: '100%', mx: 'auto' }} pt={2}>
             <Paper elevation={3} sx={{ margin: 2, padding: 2 }}>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <Controller
                         name="id"
                         control={control}
@@ -100,6 +103,13 @@ export default function EditEngagement({ engagements }: Props) {
                         </Grid>
                         <Grid item xs={12}>
                             <Autocomplete
+                                onChange={(_event: any, newValue: Contact[] | null) => {
+                                    if (newValue) {
+                                        setValue('contacts', newValue.map(c => c.id));
+                                    } else {
+                                        resetField('contacts');
+                                    }
+                                }}
                                 multiple
                                 disablePortal
                                 disableCloseOnSelect
@@ -127,7 +137,21 @@ export default function EditEngagement({ engagements }: Props) {
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <TextField label='Notes' fullWidth multiline rows={7} />
+                            <Controller
+                                name="notes"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        fullWidth
+                                        multiline
+                                        rows={7}
+                                        label="Notes"
+                                        error={Boolean(error)}
+                                        helperText={error && error.message}
+                                        {...field}
+                                    />
+                                )}
+                            />
                         </Grid>
                         <Grid item xs={12}>
                             <Button type='submit' variant="contained" fullWidth>Save</Button>
