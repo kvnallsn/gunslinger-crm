@@ -43,7 +43,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/migrations ./migrations
-COPY --from=builder --chown=nextjs:nodejs /app/docker/run.sh ./run.sh
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder /app/public ./public
 
 USER nextjs
@@ -51,4 +51,4 @@ USER nextjs
 EXPOSE 3000
 ENV PORT 3000
 
-CMD ["/bin/sh", "/app/run.sh"]
+CMD ["/bin/sh", "/app/scripts/run.sh"]
