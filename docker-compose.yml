@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=crm
+      - POSTGRES_PASSWORD=crm
+      - POSTGRES_DB=crm
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+  web:
+    image: kvnallsn/gunslinger-crm:0.1.0-alpha.02
+    ports:
+      - "9999:3000"
+    environment:
+      - DATABASE_URL=postgres://crm:crm@db:5432/crm
+      - NEXTAUTH_URL=http://crm.local:9999
+      - NEXTAUTH_SECRET=0101010101010101010101010101010101010101010101010101010101010101
+    depends_on:
+      db:
+        condition: service_healthy
