@@ -6,6 +6,7 @@ import Grade from './grades';
 import Location from './locations';
 import Organization from './organizations';
 import PhoneSystem from './phones';
+import User from './user';
 
-export { Contact, EmailSystem, Grade, Location, Organization, PhoneSystem, Engagement };
+export { Contact, EmailSystem, Grade, Location, Organization, PhoneSystem, Engagement, User };
 export type { IContactEmail, IContactPhone, IContactSocial };

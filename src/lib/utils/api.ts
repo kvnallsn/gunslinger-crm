@@ -1,8 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+type AppResponse<T> = {
+    code: number;
+    data: T,
+}
+
 type AppError = {
     code: number;
     msg: string;
+}
+
+function NewAppResponse<T>(code: number, data: T): AppResponse<T> {
+    return { code, data };
+}
+
+function NewAppError(code: number, msg: string): AppError {
+    return { code, msg };
 }
 
 function err(res: NextApiResponse<AppError>, code: number, msg: string) {
@@ -21,4 +34,4 @@ function checkPost(req: NextApiRequest): AppError | undefined {
     return undefined;
 }
 
-export { type AppError, checkPost, err };
+export { type AppError, type AppResponse, checkPost, err, NewAppError, NewAppResponse };

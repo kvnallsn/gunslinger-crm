@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import Link from 'next/link';
-import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer, ButtonGroup, Menu, MenuItem } from "@mui/material";
+import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer, ButtonGroup } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
+import DropdownMenu from "./dropdown-menu";
 
 const drawerWidth = 240;
 
@@ -14,31 +14,27 @@ const routes = [
     { display: 'Engagements', route: '/engagements' },
 ];
 
+const createRoutes = [
+    { display: 'Contact', href: '/contacts/edit' },
+    { display: 'Engagements', href: '/engagements/edit' },
+];
+
+const adminRoutes = [
+    { display: 'Manage Users', href: '/admin' },
+    { display: 'Manage Groups', href: '/admin/groups' }
+];
+
 export default function Navbar() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [createAnchorEl, setCreateAnchorEl] = useState<HTMLElement | null>(null);
-    const createMenuOpen = Boolean(createAnchorEl);
 
     const handleDrawerToggle = () => {
         setMobileOpen(open => !open);
     };
 
-    const handleCreateMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setCreateAnchorEl(event.currentTarget);
-    };
-
-    const handleCreateMenuClose = () => {
-        setCreateAnchorEl(null);
-    };
-
-    const navigate = (url: string) => {
-        handleCreateMenuClose();
-        router.push(url);
-    };
-
     const isAuthenticated = status === 'authenticated';
+    const isAdmin = session ? session.user.admin : false;
 
     const drawer = (
         <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
@@ -95,36 +91,8 @@ export default function Navbar() {
                     <Box sx={{ display: { xs: 'none', sm: 'flex', columnGap: '1em' } }}>
                         {isAuthenticated ?
                             <ButtonGroup color='inherit'>
-                                <Button
-                                    id="create-button"
-                                    aria-controls={createMenuOpen ? 'create-menu' : undefined}
-                                    aria-haspopup="true"
-                                    aria-expanded={createMenuOpen ? 'true' : undefined}
-                                    onClick={handleCreateMenuClick}
-                                    endIcon={<KeyboardArrowDownIcon />}
-                                >
-                                    Create
-                                </Button>
-                                <Menu
-                                    id="create-menu"
-                                    anchorEl={createAnchorEl}
-                                    open={createMenuOpen}
-                                    onClose={handleCreateMenuClose}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'right'
-                                    }}
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right'
-                                    }}
-                                    MenuListProps={{
-                                        'aria-labelledby': 'create-button'
-                                    }}
-                                >
-                                    <MenuItem onClick={() => navigate('/contacts/edit')}>Contact</MenuItem>
-                                    <MenuItem onClick={() => navigate('/engagements/edit')}>Engagement</MenuItem>
-                                </Menu>
+                                {isAdmin && <DropdownMenu label="Admin" options={adminRoutes} menuId="admin-menu" />}
+                                <DropdownMenu label="Create" options={createRoutes} menuId="create-menu" />
                                 <Button onClick={logout}>Logout</Button>
                             </ButtonGroup>
                             :

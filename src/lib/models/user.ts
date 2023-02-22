@@ -1,5 +1,7 @@
 import type { SqlClient } from './db';
 import { boolean, date, InferType, object, string } from 'yup';
+import CreateUserForm from '../forms/user';
+import { v4 as uuidv4 } from 'uuid';
 
 const UserSchema = object().shape({
     id: string()
@@ -20,6 +22,11 @@ const UserSchema = object().shape({
 
     active: boolean()
         .required()
+        .default(false),
+
+    admin: boolean()
+        .required()
+        .default(false)
 });
 
 interface IUser extends InferType<typeof UserSchema> { }
@@ -30,6 +37,7 @@ class User implements IUser {
     username: string;
     created: Date;
     active: boolean;
+    admin: boolean;
 
     private constructor(user: IUser) {
         this.id = user.id;
@@ -37,6 +45,18 @@ class User implements IUser {
         this.username = user.username;
         this.created = user.created;
         this.active = user.active;
+        this.admin = user.admin;
+    }
+
+    static Create(form: CreateUserForm): User {
+        return new User({
+            id: uuidv4(),
+            email: form.email,
+            username: form.username,
+            created: new Date(),
+            active: form.active,
+            admin: form.admin
+        })
     }
 
     static async fetchUserByEmail(db: SqlClient, email: string): Promise<User> {
@@ -60,8 +80,45 @@ class User implements IUser {
         return r.rows[0].password;
     }
 
+    static async fetchAll(db: SqlClient): Promise<User[]> {
+        const r = await db.query<User>('SELECT * FROM users');
+        return r.rows;
+    }
+
     toJSON() {
         return { ...this };
+    }
+
+    async save(tx: SqlClient) {
+        await tx.query(`
+            INSERT INTO users
+                (id, email, username, created, active, admin)
+            VALUES
+                ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (id) DO UPDATE
+            SET
+                email = EXCLUDED.email,
+                username = EXCLUDED.username,
+                active = EXCLUDED.active,
+                admin = EXCLUDED.admin
+        `,
+            [this.id, this.email, this.username, this.created, this.active, this.admin]
+        );
+    }
+
+    async resetPassword(tx: SqlClient, password: string) {
+        await tx.query(`
+            INSERT INTO auth_password
+                (user_id, password)
+            VALUES
+                ($1, $2)
+            ON CONFLICT (user_id)
+                DO UPDATE
+            SET
+                password = EXCLUDED.password
+        `,
+            [this.id, password]
+        );
     }
 }
 

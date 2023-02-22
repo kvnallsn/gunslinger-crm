@@ -26,8 +26,8 @@ export const authOptions = {
                     const hashed = await sysUser.fetchPassword(db);
                     const success = await argon2.verify(hashed, credentials.password);
 
-                    if (success) {
-                        user = { id: sysUser.id, name: 'Deltron Zero', email: sysUser.email, image: '' };
+                    if (success && sysUser.active) {
+                        user = { id: sysUser.id, username: 'Deltron Zero', email: sysUser.email, admin: sysUser.admin };
                     }
                 } catch (error: any) {
                     console.error(error);
@@ -39,6 +39,24 @@ export const authOptions = {
             }
         })
     ],
+    callbacks: {
+        async signIn({ user, account, profile, email, credentials }: any) {
+            return true;
+        },
+        async redirect({ url, baseUrl }: any) {
+            return baseUrl;
+        },
+        async jwt({ token, user, account, profile, isNewUser }: any) {
+            if (account) {
+                token.admin = user.admin;
+            }
+            return token;
+        },
+        async session({ session, token, user }: any) {
+            session.user.admin = token.admin;
+            return session;
+        }
+    },
     pages: {
         signIn: '/auth/signin'
     }
