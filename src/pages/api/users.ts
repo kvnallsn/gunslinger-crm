@@ -8,13 +8,13 @@ import CreateUserForm, { CreateUserFormSchema } from '@/lib/forms/user';
 import * as argon2 from '@node-rs/argon2';
 
 type Get = User[];
-type Post = string;
+type Post = User;
 
-async function get(req: NextApiRequest, db: SqlClient): Promise<User[]> {
+async function get(_req: NextApiRequest, db: SqlClient): Promise<User[]> {
     return await User.fetchAll(db);
 }
 
-async function post(req: NextApiRequest, db: SqlClient): Promise<string> {
+async function post(req: NextApiRequest, db: SqlClient): Promise<User> {
     const form: CreateUserForm = await CreateUserFormSchema.validate(req.body);
     const user = User.Create(form);
 
@@ -38,7 +38,7 @@ async function post(req: NextApiRequest, db: SqlClient): Promise<string> {
         throw error;
     }
 
-    return user.id;
+    return user;
 }
 
 export default async function handler(

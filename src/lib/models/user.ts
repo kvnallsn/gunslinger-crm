@@ -20,6 +20,9 @@ const UserSchema = object().shape({
     created: date()
         .required(),
 
+    modified: date()
+        .required(),
+
     active: boolean()
         .required()
         .default(false),
@@ -36,6 +39,7 @@ class User implements IUser {
     email: string;
     username: string;
     created: Date;
+    modified: Date;
     active: boolean;
     admin: boolean;
 
@@ -44,6 +48,7 @@ class User implements IUser {
         this.email = user.email;
         this.username = user.username;
         this.created = user.created;
+        this.modified = user.modified;
         this.active = user.active;
         this.admin = user.admin;
     }
@@ -54,6 +59,7 @@ class User implements IUser {
             email: form.email,
             username: form.username,
             created: new Date(),
+            modified: new Date(),
             active: form.active,
             admin: form.admin
         })
@@ -92,17 +98,18 @@ class User implements IUser {
     async save(tx: SqlClient) {
         await tx.query(`
             INSERT INTO users
-                (id, email, username, created, active, admin)
+                (id, email, username, created, modified, active, admin)
             VALUES
-                ($1, $2, $3, $4, $5, $6)
+                ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (id) DO UPDATE
             SET
                 email = EXCLUDED.email,
                 username = EXCLUDED.username,
+                modified = now(),
                 active = EXCLUDED.active,
                 admin = EXCLUDED.admin
         `,
-            [this.id, this.email, this.username, this.created, this.active, this.admin]
+            [this.id, this.email, this.username, this.created, this.modified, this.active, this.admin]
         );
     }
 
@@ -115,10 +122,14 @@ class User implements IUser {
             ON CONFLICT (user_id)
                 DO UPDATE
             SET
-                password = EXCLUDED.password
+                password = EXCLUDED.password,
+                changed = now()
         `,
             [this.id, password]
         );
+
+        // update the modified timestamp on the user
+        this.save(tx);
     }
 }
 

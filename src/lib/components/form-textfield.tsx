@@ -1,5 +1,5 @@
 import { TextField } from "@mui/material";
-import { Control, Controller, FieldValues } from "react-hook-form";
+import { Control, Controller } from "react-hook-form";
 
 interface Props {
     // name of the form field to bind

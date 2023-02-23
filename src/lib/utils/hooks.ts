@@ -15,13 +15,20 @@ type Response<T> = {
 
 const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
 
+function _throw(msg: string) { throw new Error(msg); }
+
+const fetcher2 = (url: string) => fetch(url, { credentials: 'include' })
+    .then(response => response.ok ? response.json() : _throw(`HTTP error: ${response.status} / ${response.statusText}`))
+    .then(response => response.data);
+
 function useUsers() {
-    const { data, error, isLoading } = useSWR<Response<User[]>>(`/api/users`, fetcher);
+    const { data, error, isLoading, mutate } = useSWR<User[]>(`/api/users`, fetcher2);
 
     return {
-        users: data?.data || [],
+        users: data || [],
         loading: isLoading,
         error: error,
+        mutate
     }
 }
 
