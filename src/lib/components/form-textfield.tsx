@@ -17,9 +17,12 @@ interface Props {
 
     // set to greater than 1 if multiline is needed
     rows?: number;
+
+    // set to true if this field should be disabled
+    disabled?: boolean;
 }
 
-export default function FormTextField({ field, control, label, type, rows }: Props) {
+export default function FormTextField({ field, control, label, type, rows, disabled }: Props) {
     return (
         <Controller
             name={field}
@@ -30,6 +33,7 @@ export default function FormTextField({ field, control, label, type, rows }: Pro
                     multiline={rows && rows > 1 ? true : false}
                     rows={rows}
                     label={label}
+                    disabled={disabled ?? false}
                     error={Boolean(error)}
                     helperText={error && error.message}
                     type={type || 'text'}

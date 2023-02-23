@@ -44,11 +44,6 @@ function AutocompleteOption(props: HTMLAttributes<HTMLLIElement>, text: string, 
     );
 }
 
-function log(v) {
-    console.log(v);
-    return true;
-}
-
 export default function FormAutocomplete({ field, control, label, multiple, options, getOptionLabel, isOptionEqualToValue, onChanged }: Props) {
     const optionText = getOptionLabel ?? ((e) => e);
     const isEqual = isOptionEqualToValue ?? ((o, v) => o === v);
@@ -58,12 +53,12 @@ export default function FormAutocomplete({ field, control, label, multiple, opti
         <Controller
             name={field}
             control={control}
-            render={({ field: { value, onChange }, fieldState: { error } }) => (
+            render={({ field: { value, onChange, onBlur, name, ref }, fieldState: { error } }) => (
                 <Autocomplete
-                    onChange={(_e, v) => {
-                        onChange(handleChanged(v));
-                    }}
+                    onChange={(_e, v) => onChange(handleChanged(v))}
+                    onBlur={onBlur}
                     value={value}
+                    ref={ref}
                     multiple={multiple || false}
                     disablePortal
                     disableCloseOnSelect={multiple || false}
@@ -75,6 +70,7 @@ export default function FormAutocomplete({ field, control, label, multiple, opti
                         <TextField
                             {...params}
                             label={label}
+                            name={name}
                             error={Boolean(error)}
                             helperText={error && error.message}
                         />

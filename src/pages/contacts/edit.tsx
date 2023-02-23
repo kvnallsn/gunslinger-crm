@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from 'next/link';
 import { SqlClient, getDatabaseConn } from "@/lib/db";
 import { Grade, Organization, Location, Contact, PhoneSystem, EmailSystem } from "@/lib/models";
@@ -14,6 +14,9 @@ import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { GetServerSidePropsContext } from "next";
+import FormHidden from "@/lib/components/form-hidden";
+import FormAutocomplete from "@/lib/components/form-autocomplete";
+import FormTextField from "@/lib/components/form-textfield";
 
 
 type Props = {
@@ -88,7 +91,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
     const [backdropMode, setBackdropMode] = useState<string>('save');
 
     // form delcaration
-    const { handleSubmit, control, watch, setValue, reset, resetField, formState: { errors } } = useForm<ContactForm>({
+    const { handleSubmit, control, watch, reset, formState: { errors } } = useForm<ContactForm>({
         mode: 'onSubmit',
         defaultValues: form,
         resolver: yupResolver(ContactFormSchema)
@@ -185,159 +188,59 @@ export default function EditContact({ grades, orgs, locations, systems, networks
             </Backdrop>
             <Paper elevation={3} sx={{ margin: 2, padding: 2 }}>
                 <form onSubmit={handleSubmit(onSubmit, onError)}>
-                    <Controller
-                        name="id"
-                        control={control}
-                        render={({ field: { value } }) => (
-                            <input type="hidden" value={value} />
-                        )}
-                    />
+                    <FormHidden control={control} field='id' />
+
                     <Grid container spacing={{ xs: 2, md: 3 }}>
                         <Grid item xs={12} sm={2}>
-                            <Controller
-                                name="grade"
+                            <FormAutocomplete
+                                field='grade'
                                 control={control}
-                                render={({ field: { value }, fieldState: { error } }) => (
-                                    <Autocomplete
-                                        onChange={(_e, v) => v ? setValue('grade', v) : resetField('grade')}
-                                        value={value}
-                                        disablePortal
-                                        options={grades}
-                                        getOptionLabel={grade => grade.name}
-                                        isOptionEqualToValue={(o, v) => o.id === v.id}
-                                        renderInput={params => (
-                                            <TextField
-                                                {...params}
-                                                label="Grade"
-                                                error={Boolean(error)}
-                                                helperText={error && error.message}
-                                            />
-                                        )}
-                                    />
-                                )}
+                                label="Rank / Grade"
+                                options={grades}
+                                getOptionLabel={grade => grade.name}
+                                isOptionEqualToValue={(o, v) => o.id === v.id}
                             />
                         </Grid>
                         <Grid item xs={12} sm={5}>
-                            <Controller
-                                name="firstName"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        fullWidth label="First Name"
-                                        error={Boolean(error)}
-                                        helperText={error && error.message}
-                                        {...field}
-                                    />
-                                )}
-                            />
+                            <FormTextField control={control} field='firstName' label="First Name" />
                         </Grid>
                         <Grid item xs={12} sm={5}>
-                            <Controller
-                                name="lastName"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        fullWidth
-                                        label="Last Name"
-                                        error={Boolean(errors.lastName)}
-                                        helperText={errors.lastName && errors.lastName.message}
-                                        {...field}
-                                    />
-                                )}
-                            />
+                            <FormTextField control={control} field='lastName' label="Last Name" />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <Autocomplete
-                                onChange={(_e, v) => v ? setValue('location', v) : resetField('location')}
-                                value={location}
-                                disablePortal
+                            <FormAutocomplete
+                                field='location'
+                                control={control}
+                                label="Location"
                                 options={locations}
                                 getOptionLabel={l => l.id === BLANK_UUID ? 'New Location' : `${l.city}, ${l.state}`}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
-                                renderInput={params => (
-                                    <TextField
-                                        {...params}
-                                        label="Location"
-                                    />
-                                )}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <Controller
-                                name="location.city"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="City"
-                                        disabled={location.id !== BLANK_UUID}
-                                        error={Boolean(error)}
-                                        helperText={error && error.message}
-                                    />
-                                )}
-                            />
+                            <FormTextField control={control} field='location.city' label="City" disabled={location.id !== BLANK_UUID} />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <Controller
-                                name="location.state"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="State"
-                                        disabled={location.id !== BLANK_UUID}
-                                        error={Boolean(error)}
-                                        helperText={error && error.message}
-                                    />
-                                )}
-                            />
+                            <FormTextField control={control} field='location.state' label="State" disabled={location.id !== BLANK_UUID} />
                         </Grid>
 
                         <Grid item xs={12} sm={4}>
-                            <Autocomplete
-                                onChange={(_e, v) => v ? setValue('org', v) : resetField('org')}
-                                value={org}
-                                disablePortal
+                            <FormAutocomplete
+                                field='org'
+                                control={control}
+                                label="Organization"
                                 options={orgs}
-                                getOptionLabel={o => o.id === BLANK_UUID ? 'New Organization' : o.name}
+                                getOptionLabel={o => o.id === BLANK_UUID ? 'New Organization' : `${o.name}`}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
-                                renderInput={params => <TextField {...params} label="Organization" />}
                             />
                         </Grid>
                         <Grid item xs={12} sm={8}>
-                            <Controller
-                                name="org.name"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="Organization Name"
-                                        disabled={org.id !== BLANK_UUID}
-                                        error={Boolean(error)}
-                                        helperText={error && error.message}
-                                    />
-                                )}
-                            />
+                            <FormTextField control={control} field='org.name' label="Organization Name" disabled={org.id !== BLANK_UUID} />
                         </Grid>
 
 
                         <Grid item xs={12}>
-                            <Controller
-                                name="title"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        fullWidth
-                                        label="Duty Title"
-                                        error={Boolean(errors.title)}
-                                        helperText={errors.title && errors.title.message}
-                                        {...field}
-                                    />
-                                )}
-                            />
+                            <FormTextField control={control} field="title" label="Duty Title" />
                         </Grid>
 
                         <Grid item xs={12} sm={12}>
