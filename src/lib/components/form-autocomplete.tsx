@@ -5,14 +5,14 @@ import { Control, Controller } from "react-hook-form";
 import { HTMLAttributes } from "react";
 
 interface Props {
-    // name of the form field to bind
-    field: string;
-
-    // form control
-    control: Control<any>;
-
     // Human-friendly label
     label: string;
+
+    value?: any;
+
+    onChange: (value: any) => void;
+
+    error: any,
 
     multiple?: boolean,
 
@@ -22,12 +22,7 @@ interface Props {
     // What to display in the textfield
     getOptionLabel?: (e: any) => string;
     getListItemLabel?: (e: any) => string;
-
     isOptionEqualToValue?: (option: any, value: any) => boolean;
-
-    // Triggered when a change/selection has been made, if the value needs to be modified before
-    // being stored in the value attribute
-    onChanged?: (value: any) => any;
 }
 
 function AutocompleteOption(props: HTMLAttributes<HTMLLIElement>, text: string, state: AutocompleteRenderOptionState) {
@@ -44,37 +39,26 @@ function AutocompleteOption(props: HTMLAttributes<HTMLLIElement>, text: string, 
     );
 }
 
-export default function FormAutocomplete({ field, control, label, multiple, options, getOptionLabel, isOptionEqualToValue, onChanged }: Props) {
+export default function FormAutocomplete({ label, multiple, options, getOptionLabel, isOptionEqualToValue, onChange, error, value }: Props) {
     const optionText = getOptionLabel ?? ((e) => e);
     const isEqual = isOptionEqualToValue ?? ((o, v) => o === v);
-    const handleChanged = onChanged ?? ((e: any) => e);
 
     return (
-        <Controller
-            name={field}
-            control={control}
-            render={({ field: { value, onChange, onBlur, name, ref }, fieldState: { error } }) => (
-                <Autocomplete
-                    onChange={(_e, v) => onChange(handleChanged(v))}
-                    onBlur={onBlur}
-                    value={value}
-                    ref={ref}
-                    multiple={multiple || false}
-                    disablePortal
-                    disableCloseOnSelect={multiple || false}
-                    options={options}
-                    isOptionEqualToValue={isEqual}
-                    getOptionLabel={optionText}
-                    renderOption={(multiple ? (props, option, state) => AutocompleteOption(props, optionText(option), state) : undefined)}
-                    renderInput={params => (
-                        <TextField
-                            {...params}
-                            label={label}
-                            name={name}
-                            error={Boolean(error)}
-                            helperText={error && error.message}
-                        />
-                    )}
+        <Autocomplete
+            onChange={(_e, v) => onChange(v)}
+            value={value}
+            multiple={multiple || false}
+            disablePortal
+            disableCloseOnSelect={multiple || false}
+            options={options}
+            isOptionEqualToValue={isEqual}
+            getOptionLabel={optionText}
+            renderOption={(multiple ? (props, option, state) => AutocompleteOption(props, optionText(option), state) : undefined)}
+            renderInput={params => (
+                <TextField
+                    {...params}
+                    label={label}
+                    error={Boolean(error)}
                 />
             )}
         />

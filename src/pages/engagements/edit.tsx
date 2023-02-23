@@ -12,6 +12,7 @@ import FormHidden from "@/lib/components/form-hidden";
 import FormTextField from "@/lib/components/form-textfield";
 import FormDatepicker from "@/lib/components/form-datepicker";
 import FormAutocomplete from "@/lib/components/form-autocomplete";
+import LoadingBackdrop from "@/lib/components/loading-backdrop";
 
 type Props = {
     engagements: string[];
@@ -29,15 +30,18 @@ export default function EditEngagement({ engagements }: Props) {
     const router = useRouter();
     const [open, setOpen] = useState<boolean>(false);
     const { contacts, loading, error } = useContacts();
+    const [backdrop, setBackdrop] = useState<string | null>(null);
 
-    const { handleSubmit, control, watch, setValue, reset, resetField, formState: { errors } } = useForm<EngagementForm>({
+    const { handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<EngagementForm>({
         mode: 'onSubmit',
         defaultValues: NewEngagementForm(engagements[0]),
         resolver: yupResolver(EngagementFormSchema)
     });
 
+    const engagementTypes = watch('ty');
+
     const onSubmit: SubmitHandler<EngagementForm> = async data => {
-        console.log(data);
+        setBackdrop('save');
 
         const resp = await fetch(`/api/engagement/save`, {
             method: 'POST',
@@ -49,16 +53,31 @@ export default function EditEngagement({ engagements }: Props) {
         });
 
         if (resp.ok) {
-            console.log('success!');
+            setBackdrop('success');
         } else {
+            setBackdrop('error');
             console.error(resp.statusText);
         }
     };
 
     const onError: SubmitErrorHandler<EngagementForm> = e => console.error(e);
 
+    const resetForm = () => {
+        reset();
+        setBackdrop(null);
+    };
+
     return (
         <Box maxWidth='lg' sx={{ width: '100%', height: '100%', mx: 'auto' }} pt={2}>
+            <LoadingBackdrop
+                status={backdrop}
+                loadingText="Saving Engagement"
+                onClose={() => setBackdrop(null)}
+                onReset={resetForm}
+                redirect="/engagements"
+                redirectText="Go to Engagements"
+            />
+
             <Paper elevation={3} sx={{ margin: 2, padding: 2 }}>
                 <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <FormHidden field="id" control={control} />
@@ -72,26 +91,23 @@ export default function EditEngagement({ engagements }: Props) {
 
                         <Grid item xs={12} sm={3}>
                             <FormAutocomplete
-                                control={control}
-                                field='ty'
                                 label="Engagement Type"
+                                value={engagementTypes}
                                 options={engagements}
                                 isOptionEqualToValue={(o, v) => o === v}
+                                onChange={v => setValue('ty', v)}
+                                error={errors['ty']}
                             />
                         </Grid>
                         <Grid item xs={12}>
                             <FormAutocomplete
-                                control={control}
-                                field="contacts"
                                 label="Participants"
                                 multiple
                                 options={contacts || []}
-                                isOptionEqualToValue={(o: Contact, v: string) => o.id === v}
-                                getOptionLabel={(c: Contact | string) => {
-                                    let contact = (typeof c === 'string') ? contacts?.find(e => e.id === c) : c;
-                                    return `${contact?.first_name} ${contact?.last_name} (${contact?.grade.name})`;
-                                }}
-                                onChanged={values => values.map((v: Contact) => v.id)}
+                                isOptionEqualToValue={(o: Contact, v: Contact) => o.id === v.id}
+                                getOptionLabel={(c: Contact) => `${c.first_name} ${c.last_name} (${c.grade.name})`}
+                                onChange={values => setValue('contacts', values.map((v: Contact) => v.id))}
+                                error={errors['contacts']}
                             />
                         </Grid>
                         <Grid item xs={12}>

@@ -17,6 +17,7 @@ import { GetServerSidePropsContext } from "next";
 import FormHidden from "@/lib/components/form-hidden";
 import FormAutocomplete from "@/lib/components/form-autocomplete";
 import FormTextField from "@/lib/components/form-textfield";
+import LoadingBackdrop from "@/lib/components/loading-backdrop";
 
 
 type Props = {
@@ -87,11 +88,10 @@ export default function EditContact({ grades, orgs, locations, systems, networks
     const [emailMenuAnchor, setEmailMenuAnchor] = useState<HTMLElement | null>(null);
     const phoneMenuOpen = Boolean(phoneMenuAnchor);
     const emailMenuOpen = Boolean(emailMenuAnchor);
-    const [backdrop, setBackdrop] = useState<boolean>(false);
-    const [backdropMode, setBackdropMode] = useState<string>('save');
+    const [backdrop, setBackdrop] = useState<string | null>(null);
 
     // form delcaration
-    const { handleSubmit, control, watch, reset, formState: { errors } } = useForm<ContactForm>({
+    const { handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<ContactForm>({
         mode: 'onSubmit',
         defaultValues: form,
         resolver: yupResolver(ContactFormSchema)
@@ -99,8 +99,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
     const phones = useFieldArray({ name: "phones", control })
     const emails = useFieldArray({ name: "emails", control })
     const onSubmit: SubmitHandler<ContactForm> = data => {
-        setBackdrop(true);
-        setBackdropMode('save');
+        setBackdrop('save');
         fetch(`/api/contact/edit`, {
             method: 'POST',
             headers: {
@@ -111,11 +110,11 @@ export default function EditContact({ grades, orgs, locations, systems, networks
         })
             .then(r => r.json())
             .then(r => {
-                setBackdropMode('success');
+                setBackdrop('success');
             })
             .catch(e => {
                 console.error(e);
-                setBackdropMode('error');
+                setBackdrop('error');
             });
     };
 
@@ -145,47 +144,20 @@ export default function EditContact({ grades, orgs, locations, systems, networks
 
     const resetForm = () => {
         reset();
-        setBackdrop(false);
+        setBackdrop(null);
     }
 
     return (
         <Box maxWidth='lg' sx={{ width: '100%', height: '100%', mx: 'auto' }} pt={2}>
-            <Backdrop
-                sx={{ background: '#ffffffaa', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={backdrop}
-            >
-                <Paper elevation={4} sx={{ margin: 2, padding: 2 }}>
-                    <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: '1em' }}>
-                        {backdropMode === 'save' &&
-                            <>
-                                <CircularProgress color='inherit' />
-                                <Typography variant="subtitle1" sx={{ mt: 1 }}>Saving Contact</Typography>
-                            </>
-                        }
+            <LoadingBackdrop
+                status={backdrop}
+                loadingText="Saving Contact"
+                onClose={() => setBackdrop(null)}
+                onReset={resetForm}
+                redirect="/contacts"
+                redirectText="Go to Contacts"
+            />
 
-                        {backdropMode === 'success' &&
-                            <>
-                                <CheckCircleIcon color="success" fontSize="large" />
-                                <Typography variant="subtitle1">Contact Saved</Typography>
-                                <Box sx={{ display: 'flex', columnGap: '1em' }}>
-                                    <Button variant="outlined" onClick={() => resetForm()}>Create Another</Button>
-                                    <Link href="/contacts">
-                                        <Button variant="contained">Go to Contacts</Button>
-                                    </Link>
-                                </Box>
-                            </>
-                        }
-
-                        {backdropMode === 'error' &&
-                            <>
-                                <ErrorIcon color="error" fontSize="large" />
-                                <Typography variant="subtitle1">Error!</Typography>
-                                <Button variant="outlined" color="error" onClick={() => setBackdrop(false)}>Close</Button>
-                            </>
-                        }
-                    </Container>
-                </Paper>
-            </Backdrop>
             <Paper elevation={3} sx={{ margin: 2, padding: 2 }}>
                 <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <FormHidden control={control} field='id' />
@@ -193,12 +165,12 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                     <Grid container spacing={{ xs: 2, md: 3 }}>
                         <Grid item xs={12} sm={2}>
                             <FormAutocomplete
-                                field='grade'
-                                control={control}
                                 label="Rank / Grade"
                                 options={grades}
                                 getOptionLabel={grade => grade.name}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
+                                onChange={v => setValue('grade', v)}
+                                error={errors['grade']}
                             />
                         </Grid>
                         <Grid item xs={12} sm={5}>
@@ -209,12 +181,12 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <FormAutocomplete
-                                field='location'
-                                control={control}
                                 label="Location"
                                 options={locations}
                                 getOptionLabel={l => l.id === BLANK_UUID ? 'New Location' : `${l.city}, ${l.state}`}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
+                                onChange={v => setValue('location', v)}
+                                error={errors['location']}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
@@ -226,12 +198,12 @@ export default function EditContact({ grades, orgs, locations, systems, networks
 
                         <Grid item xs={12} sm={4}>
                             <FormAutocomplete
-                                field='org'
-                                control={control}
                                 label="Organization"
                                 options={orgs}
                                 getOptionLabel={o => o.id === BLANK_UUID ? 'New Organization' : `${o.name}`}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
+                                onChange={v => setValue('org', v)}
+                                error={errors['org']}
                             />
                         </Grid>
                         <Grid item xs={12} sm={8}>
