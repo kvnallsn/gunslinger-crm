@@ -14,9 +14,12 @@ interface Props {
     // type of textfield (text, password, etc.)
     // default is text
     type?: string;
+
+    // set to greater than 1 if multiline is needed
+    rows?: number;
 }
 
-export default function FormTextField({ field, control, label, type }: Props) {
+export default function FormTextField({ field, control, label, type, rows }: Props) {
     return (
         <Controller
             name={field}
@@ -24,6 +27,8 @@ export default function FormTextField({ field, control, label, type }: Props) {
             render={({ field, fieldState: { error } }) => (
                 <TextField
                     fullWidth
+                    multiline={rows && rows > 1 ? true : false}
+                    rows={rows}
                     label={label}
                     error={Boolean(error)}
                     helperText={error && error.message}
