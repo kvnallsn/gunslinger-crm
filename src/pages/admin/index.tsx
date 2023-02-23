@@ -13,6 +13,7 @@ import CreateUserForm, { CreateUserFormSchema, NewCreateUserForm } from "@/lib/f
 import { yupResolver } from "@hookform/resolvers/yup";
 import FormTextField from "@/lib/components/form-textfield";
 import FormPassword from "@/lib/components/form-password";
+import FormCheckbox from "@/lib/components/form-checkbox";
 
 type ToolbarProps = {
     onClick: () => void;
@@ -81,23 +82,11 @@ function CreateUserDialog({ open, onClose, onCreate }: DialogProps) {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Controller
-                                name="active"
-                                control={control}
-                                render={({ field: { value } }) => (
-                                    <FormControlLabel control={<Checkbox checked={value} onChange={e => setValue('active', e.target.checked)} />} label="Active" />
-                                )}
-                            />
+                            <FormCheckbox control={control} field="active" label="Active" onChange={checked => setValue('active', checked)} />
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Controller
-                                name="admin"
-                                control={control}
-                                render={({ field: { value } }) => (
-                                    <FormControlLabel control={<Checkbox checked={value} onChange={e => setValue('admin', e.target.checked)} />} label="Admin" />
-                                )}
-                            />
+                            <FormCheckbox control={control} field="admin" label="Admin" onChange={checked => setValue('admin', checked)} />
                         </Grid>
 
                         <Grid item xs={12}>
