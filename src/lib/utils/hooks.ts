@@ -1,5 +1,6 @@
 import useSWR from 'swr';
 import { Contact, Engagement } from '../models';
+import Group from '../models/groups';
 import User from '../models/user';
 
 type Response<T> = {
@@ -21,11 +22,33 @@ const fetcher2 = (url: string) => fetch(url, { credentials: 'include' })
     .then(response => response.ok ? response.json() : _throw(`HTTP error: ${response.status} / ${response.statusText}`))
     .then(response => response.data);
 
+function useMe(username: string) {
+    const { data, error, isLoading, mutate } = useSWR<User>([`/api/me`, username], ([url, username]: string[]) => fetcher2(url));
+
+    return {
+        me: data,
+        loading: isLoading,
+        error: error,
+        mutate
+    }
+}
+
 function useUsers() {
     const { data, error, isLoading, mutate } = useSWR<User[]>(`/api/users`, fetcher2);
 
     return {
         users: data || [],
+        loading: isLoading,
+        error: error,
+        mutate
+    }
+}
+
+function useGroups() {
+    const { data, error, isLoading, mutate } = useSWR<Group[]>(`/api/groups`, fetcher2);
+
+    return {
+        groups: data || [],
         loading: isLoading,
         error: error,
         mutate
@@ -52,4 +75,4 @@ function useEngagements() {
     };
 }
 
-export { useContacts, useEngagements, useUsers };
+export { useContacts, useEngagements, useUsers, useGroups, useMe };

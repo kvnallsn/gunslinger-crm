@@ -27,7 +27,7 @@ export const authOptions = {
                     const success = await argon2.verify(hashed, credentials.password);
 
                     if (success && sysUser.active) {
-                        user = { id: sysUser.id, username: 'Deltron Zero', email: sysUser.email, admin: sysUser.admin };
+                        user = { id: sysUser.id, username: sysUser.username, email: sysUser.email, admin: sysUser.admin };
                     }
                 } catch (error: any) {
                     console.error(error);
@@ -48,12 +48,16 @@ export const authOptions = {
         },
         async jwt({ token, user, account, profile, isNewUser }: any) {
             if (account) {
+                token.id = user.id;
                 token.admin = user.admin;
+                token.username = user.username;
             }
             return token;
         },
         async session({ session, token, user }: any) {
+            session.user.id = token.id;
             session.user.admin = token.admin;
+            session.user.username = token.username;
             return session;
         }
     },

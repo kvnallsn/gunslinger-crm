@@ -2,22 +2,26 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { Autocomplete, AutocompleteRenderOptionState, Checkbox, TextField } from "@mui/material";
 import { Control, Controller } from "react-hook-form";
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, useState } from "react";
 
 interface Props {
     // Human-friendly label
     label: string;
 
-    value?: any;
-
     onChange: (value: any) => void;
 
-    error: any,
+    error?: any,
 
     multiple?: boolean,
 
+    disabled?: boolean,
+
     // Options
     options: any[];
+
+    size?: "small" | "medium" | undefined;
+
+    clearOnSelect?: boolean,
 
     // What to display in the textfield
     getOptionLabel?: (e: any) => string;
@@ -39,18 +43,34 @@ function AutocompleteOption(props: HTMLAttributes<HTMLLIElement>, text: string, 
     );
 }
 
-export default function FormAutocomplete({ label, multiple, options, getOptionLabel, isOptionEqualToValue, onChange, error, value }: Props) {
+export default function FormAutocomplete({ label, multiple, options, getOptionLabel, isOptionEqualToValue, onChange, error, size, disabled, clearOnSelect }: Props) {
     const optionText = getOptionLabel ?? ((e) => e);
     const isEqual = isOptionEqualToValue ?? ((o, v) => o === v);
 
+    const [value, setValue] = useState<any | undefined>(multiple ? [] : (clearOnSelect ? undefined : options[0]));
+    const [inputValue, setInputValue] = useState<string>('');
+
     return (
         <Autocomplete
-            onChange={(_e, v) => onChange(v)}
+            fullWidth
+            size={size ?? 'medium'}
+            disabled={disabled}
+            onChange={(_e, v) => {
+                onChange(v);
+                if (clearOnSelect) {
+                    setInputValue('');
+                    setValue(null);
+                } else {
+                    setValue(v);
+                }
+            }}
             value={value}
             multiple={multiple || false}
             disablePortal
             disableCloseOnSelect={multiple || false}
             options={options}
+            inputValue={inputValue}
+            onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
             isOptionEqualToValue={isEqual}
             getOptionLabel={optionText}
             renderOption={(multiple ? (props, option, state) => AutocompleteOption(props, optionText(option), state) : undefined)}

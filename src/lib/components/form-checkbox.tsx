@@ -10,17 +10,15 @@ interface Props {
 
     // text to display as field label
     label: string;
-
-    onChange: (checked: boolean) => void;
 }
 
-export default function FormCheckbox({ field, control, label, onChange }: Props) {
+export default function FormCheckbox({ field, control, label }: Props) {
     return (
         <Controller
             name={field}
             control={control}
-            render={({ field: { value } }) => (
-                <FormControlLabel control={<Checkbox checked={value} onChange={e => onChange(e.target.checked)} />} label={label} />
+            render={({ field: { value, ref, onBlur, onChange } }) => (
+                <FormControlLabel control={<Checkbox checked={value} ref={ref} onBlur={onBlur} onChange={onChange} />} label={label} />
             )}
         />
     );

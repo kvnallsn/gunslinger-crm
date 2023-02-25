@@ -3,12 +3,11 @@ import { useUsers } from "@/lib/utils/hooks";
 import { Box, Button, Checkbox, Dialog, DialogContent, DialogTitle, FormControlLabel, Grid, List, ListItem, ListItemButton, ListItemText, TextField } from "@mui/material";
 import { DataGrid, GridColumns, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarFilterButton, GridToolbarQuickFilter } from "@mui/x-data-grid";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import AddIcon from '@mui/icons-material/Add';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useState } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import CreateUserForm, { CreateUserFormSchema, NewCreateUserForm } from "@/lib/forms/user";
 import { yupResolver } from "@hookform/resolvers/yup";
 import FormTextField from "@/lib/components/form-textfield";
@@ -82,11 +81,11 @@ function CreateUserDialog({ open, onClose, onCreate }: DialogProps) {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <FormCheckbox control={control} field="active" label="Active" onChange={checked => setValue('active', checked)} />
+                            <FormCheckbox control={control} field="active" label="Active" />
                         </Grid>
 
                         <Grid item xs={12}>
-                            <FormCheckbox control={control} field="admin" label="Admin" onChange={checked => setValue('admin', checked)} />
+                            <FormCheckbox control={control} field="admin" label="Admin" />
                         </Grid>
 
                         <Grid item xs={12}>

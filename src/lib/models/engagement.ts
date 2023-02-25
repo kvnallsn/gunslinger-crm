@@ -1,3 +1,4 @@
+import { AddToQueue } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 import { Contact } from '.';
 import { SqlClient } from '../db';
@@ -10,29 +11,34 @@ interface EngagementContact {
     firstName: string;
 }
 
+interface EngagementNote {
+    text: string;
+    public: boolean;
+    groups: string[];
+}
+
 interface NewEngagement {
     id?: string;
     user: User;
     topic: string;
     date: Date;
-    notes?: string;
     contacts: Contact[];
 }
 
 class Engagement {
     id: string;
-    user_id: string;
+    created_by: string;
     topic: string;
     date: Date;
-    notes?: string;
+    modified: Date;
     contacts: EngagementContact[];
 
     constructor(e: NewEngagement) {
         this.id = e.id || uuidv4();
-        this.user_id = e.user.id;
+        this.created_by = e.user.id;
         this.topic = e.topic;
         this.date = e.date;
-        this.notes = e.notes;
+        this.modified = new Date();
         this.contacts = e.contacts.map(c => ({
             id: c.id,
             grade: c.grade.name,
@@ -41,31 +47,31 @@ class Engagement {
         }));
     }
 
-    static async fetchAll(db: SqlClient): Promise<Engagement[]> {
-        const res = await db.query<Engagement>('SELECT * FROM engagement_details');
+    // db: open database connection
+    // id: user's unique id
+    static async fetchAll(db: SqlClient, id: string): Promise<Engagement[]> {
+        const res = await db.query<Engagement>('SELECT * FROM engagement_details WHERE created_by = $1', [id]);
         return res.rows;
     }
 
-    async save(db: SqlClient) {
-        await db.query(`
+    async save(tx: SqlClient) {
+        await tx.query(`
             INSERT INTO engagements
-                (id, user_id, topic, date, notes)
+                (id, created_by, topic, date, modified)
             VALUES
                 ($1, $2, $3, $4, $5)
             ON CONFLICT (id)
                 DO UPDATE
             SET
                 topic=EXCLUDED.topic,
-                user_id=EXCLUDED.user_id,
                 date=EXCLUDED.date,
-                notes=EXCLUDED.notes
+                modified=now()
         `,
-            [this.id, this.user_id, this.topic, this.date, this.notes]);
+            [this.id, this.created_by, this.topic, this.date, this.modified]);
 
         // next insert all contacts
-        console.log('saving engagement contacts');
         for (var contact of this.contacts) {
-            await db.query(`
+            await tx.query(`
                 INSERT INTO engagement_contacts
                     (engagement_id, contact_id)
                 VALUES
@@ -74,6 +80,33 @@ class Engagement {
                     DO NOTHING
             `,
                 [this.id, contact.id]);
+        }
+    }
+
+    async addNote(tx: SqlClient, note: EngagementNote) {
+        const noteId = uuidv4();
+
+        await tx.query(`
+            INSERT INTO engagement_notes
+                (id, engagement_id, public, text)
+            VALUES
+                ($1, $2, $3, $4)
+            ON CONFLICT (id)
+                DO UPDATE
+                SET
+                    public = excluded.public,
+                    text = excluded.text
+        `, [noteId, this.id, note.public, note.text]);
+
+        for (var group of note.groups) {
+            await tx.query(`
+                INSERT INTO engagement_notes_access
+                    (engagement_notes_id, group_id)
+                VALUES
+                    ($1, $2)
+                ON CONFLICT (engagement_notes_id, group_id)
+                    DO NOTHING
+            `, [noteId, group]);
         }
     }
 }

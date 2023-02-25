@@ -16,11 +16,11 @@ const routes = [
 
 const createRoutes = [
     { display: 'Contact', href: '/contacts/edit' },
-    { display: 'Engagements', href: '/engagements/edit' },
+    { display: 'Engagement', href: '/engagements/edit' },
 ];
 
 const adminRoutes = [
-    { display: 'Manage Users', href: '/admin' },
+    { display: 'Manage Users', href: '/admin/users' },
     { display: 'Manage Groups', href: '/admin/groups' }
 ];
 

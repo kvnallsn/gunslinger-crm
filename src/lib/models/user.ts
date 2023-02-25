@@ -42,6 +42,7 @@ class User implements IUser {
     modified: Date;
     active: boolean;
     admin: boolean;
+    groups: { id: string; name: string; level: string }[];
 
     private constructor(user: IUser) {
         this.id = user.id;
@@ -51,6 +52,7 @@ class User implements IUser {
         this.modified = user.modified;
         this.active = user.active;
         this.admin = user.admin;
+        this.groups = [];
     }
 
     static Create(form: CreateUserForm): User {
@@ -63,6 +65,15 @@ class User implements IUser {
             active: form.active,
             admin: form.admin
         })
+    }
+
+    static async fetchUserByUsername(db: SqlClient, username: string): Promise<User> {
+        const r = await db.query<User>('SELECT * FROM user_detail WHERE username = $1 LIMIT 1', [username]);
+        if (r.rows.length == 0) {
+            throw new Error(`user with username(${username}) not found`);
+        }
+
+        return r.rows[0];
     }
 
     static async fetchUserByEmail(db: SqlClient, email: string): Promise<User> {

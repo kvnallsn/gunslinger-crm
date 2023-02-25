@@ -24,10 +24,13 @@ async function handleForm(tx: SqlClient, email: string, form: EngagementForm): P
         topic: form.topic,
         user: user,
         date: form.date,
-        notes: form.notes,
         contacts: contacts,
     });
     await e.save(tx);
+
+    for (var note of (form.notes ?? [])) {
+        await e.addNote(tx, { text: note.text, public: note.public, groups: note.groups ?? [] });
+    }
 
     return e;
 }

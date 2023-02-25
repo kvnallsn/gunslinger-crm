@@ -1,4 +1,4 @@
-import { object, string, InferType, array, Schema, date } from 'yup';
+import { object, string, InferType, array, Schema, date, boolean } from 'yup';
 
 const EngagementFormSchema = object().shape({
     id: string()
@@ -19,8 +19,12 @@ const EngagementFormSchema = object().shape({
         .required('at least on contact must be specified')
         .of(string().required().uuid()),
 
-    notes: string()
-        .optional()
+    notes: array()
+        .of(object({
+            text: string().required(),
+            public: boolean().required().default(false),
+            groups: array().of(string().uuid().required())
+        }))
 });
 
 type EngagementForm = InferType<typeof EngagementFormSchema>;
@@ -31,7 +35,7 @@ function NewEngagementForm(ty: string): EngagementForm {
         date: new Date(),
         ty: ty,
         contacts: [],
-        notes: '',
+        notes: [],
     }
 }
 

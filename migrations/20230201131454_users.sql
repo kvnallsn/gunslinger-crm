@@ -29,7 +29,8 @@ CREATE TYPE permission AS ENUM ('public', 'read', 'edit', 'owner');
 CREATE TABLE IF NOT EXISTS group_members (
 	group_id	UUID			NOT NULL REFERENCES groups(id),
 	user_id 	UUID 			NOT NULL REFERENCES users(id),
-	level		permission 		NOT NULL DEFAULT 'public'
+	level		permission 		NOT NULL DEFAULT 'public',
+	PRIMARY KEY(group_id, user_id)
 );
 
 -- +goose StatementBegin
@@ -55,6 +56,7 @@ CREATE VIEW user_detail AS
 		users.email,
 		users.username,
 		users.created,
+		users.modified,
 		users.active,
 		users.admin,
 		user_groups.groups
@@ -65,7 +67,32 @@ CREATE VIEW user_detail AS
 		user_groups.user_id = users.id;
 -- +goose StatementEnd
 
+-- +goose StatementBegin
+CREATE VIEW group_detail AS
+	SELECT
+		groups.id,
+		groups.name,
+		COALESCE(json_agg(json_build_object(
+			'id', group_members.user_id,
+			'username', users.username,
+			'level', group_members.level
+		)) FILTER (WHERE group_members.group_id IS NOT NULL), '[]') AS members
+	FROM
+		groups
+	LEFT JOIN
+		group_members
+		ON
+			group_members.group_id = groups.id
+	INNER JOIN
+		users
+		ON
+			users.id = group_members.user_id
+	GROUP BY
+		groups.id
+-- +goose StatementEnd
+
 -- +goose Down
+DROP VIEW IF EXISTS group_detail;
 DROP VIEW IF EXISTS user_detail;
 DROP TABLE IF EXISTS group_members;
 DROP TYPE IF EXISTS permission;

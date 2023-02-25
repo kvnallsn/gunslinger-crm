@@ -1,34 +1,56 @@
 import EngagementForm, { EngagementFormSchema, NewEngagementForm } from "@/lib/forms/engagement";
-import { useContacts } from "@/lib/utils/hooks";
+import { useContacts, useMe } from "@/lib/utils/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Autocomplete, Box, Button, Checkbox, Grid, Paper, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Divider, Grid, IconButton, Paper, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm, useFieldArray, SubmitHandler, Controller, SubmitErrorHandler } from 'react-hook-form';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import { Contact } from "@/lib/models";
+import { Contact, User } from "@/lib/models";
 import FormHidden from "@/lib/components/form-hidden";
 import FormTextField from "@/lib/components/form-textfield";
 import FormDatepicker from "@/lib/components/form-datepicker";
 import FormAutocomplete from "@/lib/components/form-autocomplete";
 import LoadingBackdrop from "@/lib/components/loading-backdrop";
+import AddIcon from "@mui/icons-material/Add";
+import FormCheckbox from "@/lib/components/form-checkbox";
+import { useSession } from "next-auth/react";
+import { getServerSession, Session } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]";
+import { GetServerSidePropsContext } from "next";
+import { getDatabaseConn } from "@/lib/db";
 
 type Props = {
     engagements: string[];
+    groups: { id: string; name: string; level: string }[];
 }
 
-export function getServerSideProps() {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+    const session: Session | null = await getServerSession(context.req, context.res, authOptions);
+
+    if (!session) {
+        return {
+            redirect: {
+                destination: '/auth/signin',
+                permanent: false
+            }
+        };
+    }
+
+    const db = await getDatabaseConn();
+    const user: User = await User.fetchUserByUsername(db, session.user.username);
+    db.release();
+
     return {
         props: {
             engagements: ['Phone', 'Email', 'Text / SMS', 'Meeting', 'Conference'],
+            groups: user.groups,
         }
     }
 }
 
-export default function EditEngagement({ engagements }: Props) {
-    const router = useRouter();
-    const [open, setOpen] = useState<boolean>(false);
+export default function EditEngagement({ engagements, groups }: Props) {
     const { contacts, loading, error } = useContacts();
     const [backdrop, setBackdrop] = useState<string | null>(null);
 
@@ -38,7 +60,7 @@ export default function EditEngagement({ engagements }: Props) {
         resolver: yupResolver(EngagementFormSchema)
     });
 
-    const engagementTypes = watch('ty');
+    const notes = useFieldArray({ name: 'notes', control });
 
     const onSubmit: SubmitHandler<EngagementForm> = async data => {
         setBackdrop('save');
@@ -63,8 +85,8 @@ export default function EditEngagement({ engagements }: Props) {
     const onError: SubmitErrorHandler<EngagementForm> = e => console.error(e);
 
     const resetForm = () => {
-        reset();
         setBackdrop(null);
+        reset();
     };
 
     return (
@@ -92,7 +114,6 @@ export default function EditEngagement({ engagements }: Props) {
                         <Grid item xs={12} sm={3}>
                             <FormAutocomplete
                                 label="Engagement Type"
-                                value={engagementTypes}
                                 options={engagements}
                                 isOptionEqualToValue={(o, v) => o === v}
                                 onChange={v => setValue('ty', v)}
@@ -111,8 +132,34 @@ export default function EditEngagement({ engagements }: Props) {
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <FormTextField control={control} field='notes' label='Notes' rows={7} />
+                            <Divider />
+                            <Box sx={{ display: 'flex', mt: 1 }}>
+                                <Typography variant='h6' sx={{ flexGrow: 1 }}>Notes</Typography>
+                                <IconButton onClick={() => notes.append({ text: '', public: false })}>
+                                    <AddIcon />
+                                </IconButton>
+                            </Box>
                         </Grid>
+
+                        {notes.fields.map((note, index) => (
+                            <Grid item xs={12} key={`note-${index}`}>
+                                <Box sx={{ display: 'flex', mb: 1 }}>
+                                    <FormCheckbox control={control} field={`notes.${index}.public`} label="Public" />
+                                    <FormAutocomplete
+                                        multiple
+                                        options={groups}
+                                        disabled={watch(`notes.${index}.public`)}
+                                        size="small"
+                                        label="Groups"
+                                        getOptionLabel={g => g.name}
+                                        isOptionEqualToValue={(o, v) => o.id === v.id}
+                                        onChange={v => setValue(`notes.${index}.groups`, v.map((g: any) => g.id))}
+                                    />
+                                </Box>
+                                <FormTextField field={`notes.${index}.text`} label="Note" control={control} rows={5} />
+                            </Grid>
+                        ))}
+
                         <Grid item xs={12}>
                             <Button type='submit' variant="contained" fullWidth>Save</Button>
                         </Grid>
