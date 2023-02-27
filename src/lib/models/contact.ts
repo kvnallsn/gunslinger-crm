@@ -34,10 +34,10 @@ interface IContactSocial {
 }
 
 interface IContactMetadata {
-	phones: IContactPhone[];
-	emails: IContactEmail[];
-	social: IContactSocial[];
-	tags: string[];
+	phones?: IContactPhone[];
+	emails?: IContactEmail[];
+	social?: IContactSocial[];
+	tags?: string[];
 }
 
 interface IContact {
@@ -66,7 +66,7 @@ interface IContactView {
 	org_id: string;
 	org: string;
 	title: string;
-	metadata: IContactMetadata,
+	metadata?: IContactMetadata,
 }
 
 class Contact {
@@ -122,10 +122,10 @@ class Contact {
 			grade: new Grade(c.grade, c.grade_id),
 			location: new Location(c.city, c.state, c.location_id),
 			org: new Organization(c.org, c.org_id),
-			phones: c.metadata.phones,
-			emails: c.metadata.emails,
-			socials: c.metadata.social,
-			tags: c.metadata.tags,
+			phones: c.metadata?.phones ?? [],
+			emails: c.metadata?.emails ?? [],
+			socials: c.metadata?.social ?? [],
+			tags: c.metadata?.tags ?? [],
 		})
 	}
 

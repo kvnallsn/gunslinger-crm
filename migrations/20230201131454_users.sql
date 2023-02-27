@@ -34,6 +34,17 @@ CREATE TABLE IF NOT EXISTS group_members (
 );
 
 -- +goose StatementBegin
+CREATE VIEW user_groups AS
+    SELECT
+        user_id,
+        array_agg(group_id) AS memberof
+    FROM
+        group_members
+    GROUP BY
+        user_id;
+-- +goose StatementEnd
+
+-- +goose StatementBegin
 CREATE VIEW user_detail AS
 	WITH user_groups AS (
 		SELECT
@@ -94,6 +105,7 @@ CREATE VIEW group_detail AS
 -- +goose Down
 DROP VIEW IF EXISTS group_detail;
 DROP VIEW IF EXISTS user_detail;
+DROP VIEW IF EXISTS user_groups;
 DROP TABLE IF EXISTS group_members;
 DROP TYPE IF EXISTS permission;
 DROP TABLE IF EXISTS groups;

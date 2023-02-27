@@ -21,6 +21,7 @@ interface NewEngagement {
     id?: string;
     user: User;
     topic: string;
+    public: boolean;
     date: Date;
     contacts: Contact[];
 }
@@ -29,6 +30,7 @@ class Engagement {
     id: string;
     created_by: string;
     topic: string;
+    public: boolean;
     date: Date;
     modified: Date;
     contacts: EngagementContact[];
@@ -37,6 +39,7 @@ class Engagement {
         this.id = e.id || uuidv4();
         this.created_by = e.user.id;
         this.topic = e.topic;
+        this.public = e.public;
         this.date = e.date;
         this.modified = new Date();
         this.contacts = e.contacts.map(c => ({
@@ -50,24 +53,36 @@ class Engagement {
     // db: open database connection
     // id: user's unique id
     static async fetchAll(db: SqlClient, id: string): Promise<Engagement[]> {
-        const res = await db.query<Engagement>('SELECT * FROM engagement_details WHERE created_by = $1', [id]);
+        const res = await db.query<Engagement>(`
+            SELECT
+                *
+            FROM
+                engagement_details
+            WHERE
+                created_by = $1
+                OR
+                groups = ANY(SELECT memberof FROM user_groups WHERE user_id = $1)
+                OR
+                public = true
+        `, [id]);
         return res.rows;
     }
 
     async save(tx: SqlClient) {
         await tx.query(`
             INSERT INTO engagements
-                (id, created_by, topic, date, modified)
+                (id, created_by, topic, public, date, modified)
             VALUES
-                ($1, $2, $3, $4, $5)
+                ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (id)
                 DO UPDATE
             SET
                 topic=EXCLUDED.topic,
+                public=EXCLUDED.public,
                 date=EXCLUDED.date,
                 modified=now()
         `,
-            [this.id, this.created_by, this.topic, this.date, this.modified]);
+            [this.id, this.created_by, this.topic, this.public, this.date, this.modified]);
 
         // next insert all contacts
         for (var contact of this.contacts) {
