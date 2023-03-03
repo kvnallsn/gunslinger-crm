@@ -1,7 +1,7 @@
 import EngagementForm, { EngagementFormSchema, NewEngagementForm } from "@/lib/forms/engagement";
 import { useContacts, useMe } from "@/lib/utils/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Autocomplete, Box, Button, Checkbox, Divider, Grid, IconButton, Paper, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Divider, Grid, IconButton, Paper, Rating, Slider, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm, useFieldArray, SubmitHandler, Controller, SubmitErrorHandler } from 'react-hook-form';
@@ -12,7 +12,6 @@ import FormHidden from "@/lib/components/form-hidden";
 import FormTextField from "@/lib/components/form-textfield";
 import FormDatepicker from "@/lib/components/form-datepicker";
 import FormAutocomplete from "@/lib/components/form-autocomplete";
-import LoadingBackdrop from "@/lib/components/loading-backdrop";
 import AddIcon from "@mui/icons-material/Add";
 import FormCheckbox from "@/lib/components/form-checkbox";
 import { useSession } from "next-auth/react";
@@ -20,6 +19,8 @@ import { getServerSession, Session } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { GetServerSidePropsContext } from "next";
 import { getDatabaseConn } from "@/lib/db";
+import FormSentiment from '@/lib/components/form-sentiment';
+import EditSaveBackdrop from '@/lib/components/edit-save-backdrop';
 
 type Props = {
     engagements: string[];
@@ -50,9 +51,20 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
 }
 
+function EmptyView() {
+    return (
+        <Grid item xs={12}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography color='#aaaaaa'><i>No Notes Added</i></Typography>
+            </Box>
+        </Grid>
+    );
+}
+
 export default function EditEngagement({ engagements, groups }: Props) {
     const { contacts, loading, error } = useContacts();
     const [backdrop, setBackdrop] = useState<string | null>(null);
+    const [sentimentValue, setSentimentValue] = useState<number>(50);
 
     const { handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<EngagementForm>({
         mode: 'onSubmit',
@@ -89,9 +101,31 @@ export default function EditEngagement({ engagements, groups }: Props) {
         reset();
     };
 
+    const sentimentRatingLabels: { [index: string]: string } = {
+        0: 'Terrible',
+        1: 'Bad',
+        3: 'Neutral',
+        4: 'Good',
+        5: 'Great'
+    };
+
+    const sentimentColors: { [index: number]: string } = {
+        0: '#ff0000',
+        10: '#ff0000',
+        20: '#ff0000',
+        30: '#ff0000',
+        40: '#ff0000',
+        50: '#ff0000',
+        60: '#00ff00',
+        70: '#00ff00',
+        80: '#00ff00',
+        90: '#00ff00',
+        100: '#00ff00',
+    };
+
     return (
         <Box maxWidth='lg' sx={{ width: '100%', height: '100%', mx: 'auto' }} pt={2}>
-            <LoadingBackdrop
+            <EditSaveBackdrop
                 status={backdrop}
                 loadingText="Saving Engagement"
                 onClose={() => setBackdrop(null)}
@@ -131,6 +165,11 @@ export default function EditEngagement({ engagements, groups }: Props) {
                                 error={errors['contacts']}
                             />
                         </Grid>
+
+                        <Grid item xs={12}>
+                            <FormSentiment />
+                        </Grid>
+
                         <Grid item xs={12}>
                             <Divider />
                             <Box sx={{ display: 'flex', mt: 1 }}>
@@ -141,6 +180,7 @@ export default function EditEngagement({ engagements, groups }: Props) {
                             </Box>
                         </Grid>
 
+                        {notes.fields.length == 0 && <EmptyView />}
                         {notes.fields.map((note, index) => (
                             <Grid item xs={12} key={`note-${index}`}>
                                 <Box sx={{ display: 'flex', mb: 1 }}>

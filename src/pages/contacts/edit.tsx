@@ -17,7 +17,7 @@ import { GetServerSidePropsContext } from "next";
 import FormHidden from "@/lib/components/form-hidden";
 import FormAutocomplete from "@/lib/components/form-autocomplete";
 import FormTextField from "@/lib/components/form-textfield";
-import LoadingBackdrop from "@/lib/components/loading-backdrop";
+import EditSaveBackdrop from '@/lib/components/edit-save-backdrop';
 
 
 type Props = {
@@ -149,7 +149,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
 
     return (
         <Box maxWidth='lg' sx={{ width: '100%', height: '100%', mx: 'auto' }} pt={2}>
-            <LoadingBackdrop
+            <EditSaveBackdrop
                 status={backdrop}
                 loadingText="Saving Contact"
                 onClose={() => setBackdrop(null)}

@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Engagement } from '@/lib/models';
 import { getDatabaseConn, SqlClient } from '@/lib/db'
-import { AppError, err } from '@/lib/utils/api';
+import { AppError, AppResponse, err, NewAppResponse } from '@/lib/utils/api';
 import { getServerSession, Session } from 'next-auth';
 import { authOptions } from './auth/[...nextauth]';
 
-type Data = Engagement[];
+type Data = AppResponse<Engagement[] | Engagement>;
 
 export default async function handler(
     req: NextApiRequest,
@@ -17,11 +17,17 @@ export default async function handler(
         return
     }
 
+    const { id } = req.query;
+
     let db: SqlClient | undefined = undefined;
-    let data: Engagement[] = [];
+    let data: Engagement[] | Engagement = [];
     try {
         db = await getDatabaseConn();
-        data = await Engagement.fetchAll(db, session.user.id);
+        if (!id) {
+            data = await Engagement.fetchAll(db, session.user.id);
+        } else {
+            data = await Engagement.fetch(db, session.user.id, Array.isArray(id) ? id[0] : id);
+        }
     } catch (error: any) {
         console.error(error);
         await db?.query('ROLLBACK');
@@ -31,5 +37,5 @@ export default async function handler(
         db?.release()
     }
 
-    res.status(200).json(data);
+    res.status(200).json(NewAppResponse(200, data));
 }

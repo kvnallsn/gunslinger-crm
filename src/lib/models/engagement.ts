@@ -68,6 +68,33 @@ class Engagement {
         return res.rows;
     }
 
+    static async fetch(db: SqlClient, userId: string, id: string): Promise<Engagement> {
+        const res = await db.query<Engagement>(`
+            SELECT
+                *
+            FROM
+                engagement_details
+            WHERE
+                (
+                    created_by = $1
+                    OR
+                    groups = ANY(SELECT memberof FROM user_groups WHERE user_id = $1)
+                    OR
+                    public = true
+                )
+                AND
+                (
+                    id = $2
+                )
+            LIMIT 1
+        `, [userId, id]);
+        return res.rows[0];
+    }
+
+    toJSON() {
+        return { ...this };
+    }
+
     async save(tx: SqlClient) {
         await tx.query(`
             INSERT INTO engagements

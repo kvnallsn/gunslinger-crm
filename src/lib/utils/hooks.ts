@@ -66,7 +66,7 @@ function useContacts() {
 }
 
 function useEngagements() {
-    const { data, error, isLoading } = useSWR<Engagement[]>(`/api/engagements`, fetcher);
+    const { data, error, isLoading } = useSWR<Engagement[]>(`/api/engagements`, fetcher2);
 
     return {
         engagements: data,
@@ -75,4 +75,14 @@ function useEngagements() {
     };
 }
 
-export { useContacts, useEngagements, useUsers, useGroups, useMe };
+function useEngagement(id: string) {
+    const { data, error, isLoading } = useSWR<Engagement>(['/api/engagements', id], ([url, id]: string[]) => fetcher2(`${url}?id=${id}`));
+
+    return {
+        engagement: data,
+        loading: isLoading,
+        error: error
+    };
+}
+
+export { useContacts, useEngagement, useEngagements, useUsers, useGroups, useMe };
