@@ -5,11 +5,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
 import DropdownMenu from "./dropdown-menu";
+import DarkModeToggle from "./darkmode-toggle";
 
 const drawerWidth = 240;
 
 const routes = [
-    { display: 'Home', route: '/' },
     { display: 'Contacts', route: '/contacts ' },
     { display: 'Engagements', route: '/engagements' },
 ];
@@ -81,7 +81,7 @@ export default function Navbar() {
                     </Typography>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
                         {isAuthenticated && routes.map(item => (
-                            <Link key={item.display} href={item.route}>
+                            <Link key={item.display} href={item.route} passHref legacyBehavior>
                                 <Button sx={{ my: 2, color: 'inherit' }}>
                                     {item.display}
                                 </Button>
@@ -89,6 +89,7 @@ export default function Navbar() {
                         ))}
                     </Box>
                     <Box sx={{ display: { xs: 'none', sm: 'flex', columnGap: '1em' } }}>
+                        <DarkModeToggle />
                         {isAuthenticated ?
                             <ButtonGroup color='inherit'>
                                 {isAdmin && <DropdownMenu label="Admin" options={adminRoutes} menuId="admin-menu" />}
