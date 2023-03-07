@@ -1,14 +1,8 @@
 import LoadingBackdrop from '@/lib/components/loading-backdrop';
-import { getDatabaseConn } from "@/lib/db";
-import { Engagement } from "@/lib/models";
-import { useEngagement, useEngagementNotes, useEngagementTopics } from '@/lib/utils/hooks';
-import { AppBar, Avatar, Box, Card, CardContent, CardHeader, Chip, Divider, Grid, Paper, Tab, Tabs, TextField, Toolbar, Typography } from "@mui/material";
-import { bgcolor } from '@mui/system';
-import { GetServerSidePropsContext } from "next";
-import { getServerSession } from "next-auth";
+import { useEngagement, useEngagementNotes } from '@/lib/utils/hooks';
+import { AppBar, Avatar, Box, Card, CardContent, CardHeader, Chip, Grid, Paper, TextField, Toolbar, Typography } from "@mui/material";
+import { useTheme } from '@mui/system';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { authOptions } from "../api/auth/[...nextauth]";
 import PublicIcon from '@mui/icons-material/Public';
 import LockIcon from '@mui/icons-material/Lock';
 import { green, orange, grey } from '@mui/material/colors';
@@ -83,15 +77,17 @@ function EngagementTopic(props: any) {
     const { topic } = props;
 
     return (
-        <Chip label={topic.topic} />
+        <Chip label={topic.topic} variant="outlined" />
     );
 }
 
 function Section(props: any) {
     const { title, children } = props;
+    const theme = useTheme();
+
     return (
         <Paper variant='outlined' sx={{ mb: 4 }}>
-            <Box bgcolor={grey[100]}>
+            <Box bgcolor={theme.palette.mode === 'dark' ? grey[800] : grey[100]}>
                 <Typography variant='h6' color='inherit' sx={{ p: 1 }}>{title}</Typography>
             </Box>
             {children}
@@ -102,11 +98,9 @@ function Section(props: any) {
 export default function EngagementDetail() {
     const router = useRouter();
     const { id } = router.query;
-    const [tab, setTab] = useState<number>(0);
 
     const { engagement, loading } = useEngagement(id as string);
     const { notes, loading: notesLoading } = useEngagementNotes(id as string);
-    const { topics, loading: topicsLoading } = useEngagementTopics(id as string);
 
     const formatDate = (d: Date | undefined) => {
         if (d === undefined) {
@@ -138,7 +132,7 @@ export default function EngagementDetail() {
                 <Box sx={{ m: 2, flexGrow: 1 }}>
                     <Section title="Topics">
                         <Box sx={{ display: 'flex', columnGap: '1em', p: 1 }}>
-                            {topics?.map(t => <EngagementTopic key={`t-${t.id}`} topic={t} />)}
+                            {engagement?.topics.map(t => <EngagementTopic key={`t-${t.id}`} topic={t} />)}
                         </Box>
                     </Section>
 

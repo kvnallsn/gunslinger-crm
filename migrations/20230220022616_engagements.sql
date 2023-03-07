@@ -121,6 +121,21 @@ CREATE VIEW engagement_note_details AS
 
 -- +goose StatementBegin
 CREATE VIEW engagement_details AS
+    WITH eg_topics AS (
+        SELECT 
+            engagement_topics.engagement_id,
+            json_agg(jsonb_build_object(
+                'id', topics.id,
+                'topic', topics.topic
+            )) AS topics
+        FROM
+            engagement_topics
+        INNER JOIN
+            topics
+            ON topics.id = engagement_topics.topic_id
+        GROUP BY
+            engagement_topics.engagement_id
+    )
     SELECT
         engagements.id,
         engagements.created_by,
@@ -128,7 +143,8 @@ CREATE VIEW engagement_details AS
         engagements.date,
         engagements.modified,
         engagement_contact_details.contacts,
-        engagement_orgs.orgs
+        engagement_orgs.orgs,
+        eg_topics.topics
     FROM
         engagements
     INNER JOIN
@@ -142,7 +158,11 @@ CREATE VIEW engagement_details AS
     INNER JOIN
         engagement_orgs
         ON
-            engagement_orgs.engagement_id = engagements.id;
+            engagement_orgs.engagement_id = engagements.id
+    INNER JOIN
+        eg_topics
+        ON
+            eg_topics.engagement_id = engagements.id;
 -- +goose StatementEnd
 
 -- +goose Down

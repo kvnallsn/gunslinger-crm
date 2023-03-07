@@ -20,6 +20,11 @@ export interface Topic {
     topic: string;
 }
 
+export interface EngagementTopic {
+    id: string;
+    topic: string;
+}
+
 export interface EngagementOrg {
     org_id: string;
     org_name: string;
@@ -52,6 +57,7 @@ class Engagement {
     modified: Date;
     contacts: EngagementContact[];
     orgs: EngagementOrg[];
+    topics: EngagementTopic[];
 
     constructor(e: NewEngagement) {
         this.id = e.id || uuidv4();
@@ -73,6 +79,8 @@ class Engagement {
         let orgs = e.contacts
             .map(c => ({ org_id: c.organization.id, org_name: c.organization.name }));
         this.orgs = orgs.filter((o, idx) => orgs.indexOf(o) !== idx);
+
+        this.topics = [];
     }
 
     // db: open database connection
