@@ -6,22 +6,39 @@ import User from './user';
 
 interface EngagementContact {
     id: string;
+    org_id: string;
+    org: string;
     grade: string;
     lastName: string;
     firstName: string;
 }
 
-interface EngagementNote {
-    text: string;
+export interface Topic {
+    id: string;
+    created_by: string;
+    created: Date;
+    topic: string;
+}
+
+export interface EngagementOrg {
+    org_id: string;
+    org_name: string;
+}
+
+export interface EngagementNote {
+    id: string;
+    engagement_id: string;
+    created_by: string;
+    username: string;
     public: boolean;
+    note: string;
     groups: string[];
+    group_names: string[];
 }
 
 interface NewEngagement {
     id?: string;
     user: User;
-    topic: string;
-    public: boolean;
     date: Date;
     contacts: Contact[];
 }
@@ -29,25 +46,33 @@ interface NewEngagement {
 class Engagement {
     id: string;
     created_by: string;
-    topic: string;
-    public: boolean;
+    username: string;
     date: Date;
+    created: Date;
     modified: Date;
     contacts: EngagementContact[];
+    orgs: EngagementOrg[];
 
     constructor(e: NewEngagement) {
         this.id = e.id || uuidv4();
         this.created_by = e.user.id;
-        this.topic = e.topic;
-        this.public = e.public;
+        this.username = e.user.username;
         this.date = e.date;
+        this.created = new Date();
         this.modified = new Date();
         this.contacts = e.contacts.map(c => ({
             id: c.id,
+            org_id: c.organization.id,
+            org: c.organization.name,
             grade: c.grade.name,
             lastName: c.last_name,
             firstName: c.first_name,
         }));
+
+        // dedup the orgs
+        let orgs = e.contacts
+            .map(c => ({ org_id: c.organization.id, org_name: c.organization.name }));
+        this.orgs = orgs.filter((o, idx) => orgs.indexOf(o) !== idx);
     }
 
     // db: open database connection
@@ -58,13 +83,7 @@ class Engagement {
                 *
             FROM
                 engagement_details
-            WHERE
-                created_by = $1
-                OR
-                groups = ANY(SELECT memberof FROM user_groups WHERE user_id = $1)
-                OR
-                public = true
-        `, [id]);
+        `);
         return res.rows;
     }
 
@@ -75,20 +94,52 @@ class Engagement {
             FROM
                 engagement_details
             WHERE
+                id = $1
+            LIMIT 1
+        `, [id]);
+        return res.rows[0];
+    }
+
+    static async fetchNotes(db: SqlClient, userId: string, id: string): Promise<EngagementNote[]> {
+        const res = await db.query<EngagementNote>(`
+            SELECT
+                *
+            FROM
+                engagement_note_details
+            WHERE
+                engagement_id = $1
+                AND
                 (
-                    created_by = $1
-                    OR
-                    groups = ANY(SELECT memberof FROM user_groups WHERE user_id = $1)
+                    groups && (SELECT memberof FROM user_groups WHERE user_id = $2)
                     OR
                     public = true
                 )
-                AND
-                (
-                    id = $2
-                )
-            LIMIT 1
-        `, [userId, id]);
-        return res.rows[0];
+        `,
+            [id, userId]);
+
+        return res.rows;
+    }
+
+    static async fetchTopics(db: SqlClient, engagementId: string): Promise<Topic[]> {
+        const res = await db.query<Topic>(`
+            SELECT
+                topics.id,
+                topics.created_by,
+                topics.created,
+                topics.topic
+            FROM
+                engagement_topics
+            INNER JOIN
+                topics
+                ON
+                topics.id = engagement_topics.topic_id
+            WHERE
+                engagement_id = $1
+        `,
+            [engagementId]
+        );
+
+        return res.rows;
     }
 
     toJSON() {
@@ -98,18 +149,16 @@ class Engagement {
     async save(tx: SqlClient) {
         await tx.query(`
             INSERT INTO engagements
-                (id, created_by, topic, public, date, modified)
+                (id, created_by, date, created, modified)
             VALUES
-                ($1, $2, $3, $4, $5, $6)
+                ($1, $2, $3, $4, $5)
             ON CONFLICT (id)
                 DO UPDATE
             SET
-                topic=EXCLUDED.topic,
-                public=EXCLUDED.public,
                 date=EXCLUDED.date,
                 modified=now()
         `,
-            [this.id, this.created_by, this.topic, this.public, this.date, this.modified]);
+            [this.id, this.created_by, this.date, this.created, this.modified]);
 
         // next insert all contacts
         for (var contact of this.contacts) {
@@ -130,23 +179,23 @@ class Engagement {
 
         await tx.query(`
             INSERT INTO engagement_notes
-                (id, engagement_id, public, text)
+                (id, engagement_id, public, note)
             VALUES
                 ($1, $2, $3, $4)
             ON CONFLICT (id)
                 DO UPDATE
                 SET
                     public = excluded.public,
-                    text = excluded.text
-        `, [noteId, this.id, note.public, note.text]);
+                    note = excluded.note
+        `, [noteId, this.id, note.public, note.note]);
 
         for (var group of note.groups) {
             await tx.query(`
-                INSERT INTO engagement_notes_access
-                    (engagement_notes_id, group_id)
+                INSERT INTO engagement_notes_permissions
+                    (note_id, group_id)
                 VALUES
                     ($1, $2)
-                ON CONFLICT (engagement_notes_id, group_id)
+                ON CONFLICT (note_id, group_id)
                     DO NOTHING
             `, [noteId, group]);
         }

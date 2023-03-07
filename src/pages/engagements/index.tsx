@@ -16,12 +16,12 @@ export default function Engagements() {
     };
 
     const columns: GridColumns<Engagement> = [
-        { field: 'topic', headerName: 'Topic', flex: 2 },
-        { field: 'date', headerName: 'Date/Time', type: 'dateTime', flex: 2, valueGetter: v => v && new Date(v.row.date) },
+        { field: 'date', headerName: 'Date/Time', type: 'dateTime', flex: 1, valueGetter: v => v && new Date(v.row.date) },
+        { field: 'username', headerName: 'Created By', flex: 1 },
         {
-            field: 'contacts', headerName: 'Contacts', flex: 3, renderCell: params => (
+            field: 'orgs', headerName: 'Organizations', flex: 3, renderCell: params => (
                 <Box sx={{ display: 'flex', columnGap: '1em', overflowX: 'hidden' }}>
-                    {params.row.contacts.map(c => <Chip key={`chip-${c.id}`} label={`${c.firstName} ${c.lastName}`} />)}
+                    {params.row.orgs.map(o => <Chip key={`chip-org-${o.org_id}`} label={o.org_name} />)}
                 </Box>
             )
         },

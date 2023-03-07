@@ -51,50 +51,67 @@ VALUES
 INSERT INTO contacts
     (id, last_name, first_name, grade, location, org, title)
 VALUES
-    ('00000000-0000-1000-b000-000000000051', 'Gates', 'William', '5c7d3062-79d2-41f1-b411-7c32f918ebc5', '00000000-0000-1000-b000-000000000041', '00000000-0000-1000-b000-000000000031', 'Chairman'),
-    ('00000000-0000-1000-b000-000000000052', 'Nadella', 'Satya', '5c7d3062-79d2-41f1-b411-7c32f918ebc5', '00000000-0000-1000-b000-000000000041', '00000000-0000-1000-b000-000000000031', 'CEO'),
-    ('00000000-0000-1000-b000-000000000053', 'Scott', 'Kevin', '5c7d3062-79d2-41f1-b411-7c32f918ebc5', '00000000-0000-1000-b000-000000000041', '00000000-0000-1000-b000-000000000031', 'CTO'),
-    ('00000000-0000-1000-b000-000000000054', 'Pichai', 'Sundar', '5c7d3062-79d2-41f1-b411-7c32f918ebc5', '00000000-0000-1000-b000-000000000042', '00000000-0000-1000-b000-000000000032', 'CEO'),
-    ('00000000-0000-1000-b000-000000000055', 'Porat', 'Ruth', '5c7d3062-79d2-41f1-b411-7c32f918ebc5', '00000000-0000-1000-b000-000000000042', '00000000-0000-1000-b000-000000000032', 'CFO'),
-    ('00000000-0000-1000-b000-000000000056', 'Jassy', 'Andy', '5c7d3062-79d2-41f1-b411-7c32f918ebc5', '00000000-0000-1000-b000-000000000043', '00000000-0000-1000-b000-000000000033', 'CEO');
+    ('00000000-0000-1000-b000-000000000051', 'Gates', 'William', '701d3f24-4dc8-41da-a599-54de44c9b670', '00000000-0000-1000-b000-000000000041', '00000000-0000-1000-b000-000000000031', 'Chairman'),
+    ('00000000-0000-1000-b000-000000000052', 'Nadella', 'Satya', '701d3f24-4dc8-41da-a599-54de44c9b670', '00000000-0000-1000-b000-000000000041', '00000000-0000-1000-b000-000000000031', 'CEO'),
+    ('00000000-0000-1000-b000-000000000053', 'Scott', 'Kevin', '701d3f24-4dc8-41da-a599-54de44c9b670', '00000000-0000-1000-b000-000000000041', '00000000-0000-1000-b000-000000000031', 'CTO'),
+    ('00000000-0000-1000-b000-000000000054', 'Pichai', 'Sundar', '701d3f24-4dc8-41da-a599-54de44c9b670', '00000000-0000-1000-b000-000000000042', '00000000-0000-1000-b000-000000000032', 'CEO'),
+    ('00000000-0000-1000-b000-000000000055', 'Porat', 'Ruth', '701d3f24-4dc8-41da-a599-54de44c9b670', '00000000-0000-1000-b000-000000000042', '00000000-0000-1000-b000-000000000032', 'CFO'),
+    ('00000000-0000-1000-b000-000000000056', 'Jassy', 'Andy', '701d3f24-4dc8-41da-a599-54de44c9b670', '00000000-0000-1000-b000-000000000043', '00000000-0000-1000-b000-000000000033', 'CEO');
 
+INSERT INTO topics
+    (id, created_by, topic)
+VALUES
+    ('00000000-0000-1000-b000-000000000081', '00000000-0000-1000-b000-000000000011', 'Retention'),
+    ('00000000-0000-1000-b000-000000000082', '00000000-0000-1000-b000-000000000011', 'PDS'),
+    ('00000000-0000-1000-b000-000000000083', '00000000-0000-1000-b000-000000000011', 'Readiness');
 
 INSERT INTO engagements
-    (id, created_by, topic, date, public)
+    (id, created_by, date)
 VALUES
-    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000011', 'Cyber Warfare', '2023-02-22 13:00:22.765638+00', true),
-    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000011', 'Retention', '2023-02-15 04:57:00.765638+00', false);
+    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000011', '2023-02-22 13:00:22.765638+00'),
+    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000011', '2023-02-15 04:57:00.765638+00');
+
+INSERT INTO engagement_topics
+    (engagement_id, topic_id)
+VALUES
+    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000081'),
+    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000082'),
+    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000083'),
+    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000082');
 
 INSERT INTO engagement_contacts
-    (engagement_id, contact_id)
+    (engagement_id, contact_id, org_id)
 VALUES
-    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000051'),
-    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000052'),
-    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000053'),
-    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000054'),
-    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000055');
+    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000051', '00000000-0000-1000-b000-000000000031'),
+    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000052', '00000000-0000-1000-b000-000000000031'),
+    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000053', '00000000-0000-1000-b000-000000000031'),
+    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000054', '00000000-0000-1000-b000-000000000032'),
+    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000055', '00000000-0000-1000-b000-000000000032'),
+    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000056', '00000000-0000-1000-b000-000000000033');
 
 
 INSERT INTO engagement_notes
-    (id, engagement_id, public, note)
+    (id, engagement_id, created_by, public, note)
 VALUES
-    ('00000000-0000-1000-b000-000000000071', '00000000-0000-1000-b000-000000000061', true, 'Azure can do it!'),
-    ('00000000-0000-1000-b000-000000000072', '00000000-0000-1000-b000-000000000061', false, 'Or can it?'),
-    ('00000000-0000-1000-b000-000000000073', '00000000-0000-1000-b000-000000000062', false, 'Stability....');
+    ('00000000-0000-1000-b000-000000000071', '00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000011', true, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'),
+    ('00000000-0000-1000-b000-000000000072', '00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000011', false, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Consectetur adipiscing elit duis tristique. Erat imperdiet sed euismod nisi porta lorem mollis aliquam. Felis donec et odio pellentesque diam. Nunc id cursus metus aliquam eleifend mi in. Massa massa ultricies mi quis hendrerit dolor magna. Nisi scelerisque eu ultrices vitae auctor eu augue ut. Amet volutpat consequat mauris nunc congue nisi vitae. Nisi porta lorem mollis aliquam ut porttitor. Molestie a iaculis at erat pellentesque adipiscing commodo. Amet nisl purus in mollis nunc sed id semper risus. Proin libero nunc consequat interdum varius sit. Faucibus interdum posuere lorem ipsum dolor sit. Leo duis ut diam quam nulla porttitor massa id. Tortor aliquam nulla facilisi cras fermentum odio eu feugiat. Elit ullamcorper dignissim cras tincidunt. Posuere morbi leo urna molestie at elementum eu facilisis sed. Enim sit amet venenatis urna cursus eget. Aliquam sem et tortor consequat. Fames ac turpis egestas sed. Odio ut sem nulla pharetra. Egestas erat imperdiet sed euismod nisi porta lorem. Vestibulum morbi blandit cursus risus at. Ac tincidunt vitae semper quis lectus nulla at. Faucibus scelerisque eleifend donec pretium vulputate sapien nec sagittis. Lectus quam id leo in vitae turpis. Et egestas quis ipsum suspendisse.'),
+    ('00000000-0000-1000-b000-000000000073', '00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000011', false, 'Stability....');
 
-INSERT INTO engagement_permissions
-    (engagement_id, group_id)
+INSERT INTO engagement_note_permissions
+    (note_id, group_id)
 VALUES
-    ('00000000-0000-1000-b000-000000000061', '00000000-0000-1000-b000-000000000021'),
-    ('00000000-0000-1000-b000-000000000062', '00000000-0000-1000-b000-000000000021');
+    ('00000000-0000-1000-b000-000000000072', '00000000-0000-1000-b000-000000000021'),
+    ('00000000-0000-1000-b000-000000000073', '00000000-0000-1000-b000-000000000021');
 
 -- +goose Down
 -- +goose StatementBegin
-DELETE FROM engagement_permissions;
+DELETE FROM engagement_topics;
+DELETE FROM engagement_note_permissions;
 DELETE FROM engagement_notes;
 DELETE FROM engagement_contacts;
 DELETE FROM engagements;
 DELETE FROM contacts;
+DELETE FROM topics;
 DELETE FROM group_members;
 DELETE FROM groups;
 DELETE FROM locations;
