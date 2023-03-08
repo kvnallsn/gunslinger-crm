@@ -24,6 +24,13 @@ export interface EngagementOrg {
     org_name: string;
 }
 
+export interface NewEngagementNote {
+    created_by: User;
+    text: string;
+    public: boolean;
+    groups?: string[];
+}
+
 export interface EngagementNote {
     id: string;
     engagement_id: string;
@@ -40,6 +47,7 @@ interface NewEngagement {
     user: User;
     date: Date;
     contacts: Contact[];
+    topics: Topic[];
 }
 
 class Engagement {
@@ -74,7 +82,7 @@ class Engagement {
             .map(c => ({ org_id: c.organization.id, org_name: c.organization.name }));
         this.orgs = orgs.filter((o, idx) => orgs.indexOf(o) !== idx);
 
-        this.topics = [];
+        this.topics = e.topics.map((t: Topic) => ({ id: t.id, topic: t.topic }));
     }
 
     // db: open database connection
@@ -166,34 +174,47 @@ class Engagement {
         for (var contact of this.contacts) {
             await tx.query(`
                 INSERT INTO engagement_contacts
-                    (engagement_id, contact_id)
+                    (engagement_id, contact_id, org_id)
                 VALUES
-                    ($1, $2) 
-                ON CONFLICT (engagement_id, contact_id)
+                    ($1, $2, $3) 
+                ON CONFLICT (engagement_id, contact_id, org_id)
                     DO NOTHING
             `,
-                [this.id, contact.id]);
+                [this.id, contact.id, contact.org_id]);
+        }
+
+        // now insert topic links
+        for (const topic of this.topics) {
+            await tx.query(`
+                INSERT INTO engagement_topics
+                    (engagement_id, topic_id)
+                VALUES
+                    ($1, $2)
+                ON CONFLICT (engagement_id, topic_id)
+                    DO NOTHING
+            `,
+                [this.id, topic.id]);
         }
     }
 
-    async addNote(tx: SqlClient, note: EngagementNote) {
+    async addNote(tx: SqlClient, note: NewEngagementNote) {
         const noteId = uuidv4();
 
         await tx.query(`
             INSERT INTO engagement_notes
-                (id, engagement_id, public, note)
+                (id, engagement_id, created_by, public, note)
             VALUES
-                ($1, $2, $3, $4)
+                ($1, $2, $3, $4, $5)
             ON CONFLICT (id)
                 DO UPDATE
                 SET
                     public = excluded.public,
                     note = excluded.note
-        `, [noteId, this.id, note.public, note.note]);
+        `, [noteId, this.id, note.created_by.id, note.public, note.text]);
 
-        for (var group of note.groups) {
+        for (var group of note.groups ?? []) {
             await tx.query(`
-                INSERT INTO engagement_notes_permissions
+                INSERT INTO engagement_note_permissions
                     (note_id, group_id)
                 VALUES
                     ($1, $2)

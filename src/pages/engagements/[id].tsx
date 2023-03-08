@@ -65,7 +65,7 @@ function EngagementNote(props: any) {
                     rows={5}
                     value={note.note}
                     inputProps={{
-                        readonly: true
+                        readOnly: true
                     }}
                 />
             </CardContent>
@@ -136,7 +136,7 @@ export default function EngagementDetail() {
                         </Box>
                     </Section>
 
-                    <Section title="Contacts">
+                    <Section title="Participants">
                         <Grid container spacing={2} sx={{ p: 1 }}>
                             {engagement?.contacts.map(c => <Grid key={`eg - c - ${c.id} `} item xs={12} sm={4} md={3} lg={2}><EngagementCard contact={c} /></Grid>)}
                         </Grid>

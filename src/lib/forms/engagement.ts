@@ -5,9 +5,10 @@ const EngagementFormSchema = object().shape({
         .optional()
         .uuid("must to a uuid"),
 
-    topic: string()
-        .required("A topic is required")
-        .min(2, "Must be at least two characters"),
+    topics: array()
+        .of(string().required("A topic is required").min(2, "Must be at least two characters"))
+        .min(1, "Must be at least one topic")
+        .required(),
 
     date: date()
         .required("A date/time is required"),
@@ -31,7 +32,7 @@ type EngagementForm = InferType<typeof EngagementFormSchema>;
 
 function NewEngagementForm(ty: string): EngagementForm {
     return {
-        topic: '',
+        topics: [],
         date: new Date(),
         ty: ty,
         contacts: [],

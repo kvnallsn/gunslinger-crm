@@ -14,7 +14,12 @@ async function get(_req: NextApiRequest, db: SqlClient): Promise<User[]> {
     return await User.fetchAll(db);
 }
 
-async function post(req: NextApiRequest, db: SqlClient): Promise<User> {
+async function post(req: NextApiRequest, session: Session, db: SqlClient): Promise<User> {
+    // must be an admin to create a user
+    if (!session.user.admin) {
+        throw new Error('must be an admin to create a user');
+    }
+
     const form: CreateUserForm = await CreateUserFormSchema.validate(req.body);
     const user = User.Create(form);
 
@@ -46,7 +51,7 @@ export default async function handler(
     res: NextApiResponse<AppResponse<Get> | AppResponse<Post> | AppError>
 ) {
     const session: Session | null = await getServerSession(req, res, authOptions);
-    if (!session || !session.user.admin) {
+    if (!session) {
         err(res, 401, "unauthorized");
         return;
     }
@@ -59,7 +64,7 @@ export default async function handler(
                 resp = NewAppResponse(200, await get(req, db));
                 break;
             case 'POST':
-                resp = NewAppResponse(201, await post(req, db));
+                resp = NewAppResponse(201, await post(req, session, db));
                 break;
             default:
                 resp = NewAppError(405, "Method Not Allowed");

@@ -7,6 +7,7 @@ import { Contact, Engagement } from '@/lib/models';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getServerSession } from 'next-auth/next';
 import User from "@/lib/models/user";
+import { Topic } from '@/lib/models/topic';
 
 type Data = {
     id: string;
@@ -18,18 +19,23 @@ async function handleForm(tx: SqlClient, email: string, form: EngagementForm): P
 
     // validate contacts
     const contacts = await Contact.fetchMany(tx, form.contacts);
+    const userContact = await Contact.fetchByUser(tx, user);
+
+    // validate topics
+    const topics = await Topic.fetchMany(tx, form.topics);
 
     // create engagement
     const e = new Engagement({
-        topic: form.topic,
         user: user,
         date: form.date,
-        contacts: contacts,
+        contacts: [...contacts, userContact],
+        topics: topics,
     });
+
     await e.save(tx);
 
     for (var note of (form.notes ?? [])) {
-        await e.addNote(tx, { text: note.text, public: note.public, groups: note.groups ?? [] });
+        await e.addNote(tx, { text: note.text, created_by: user, public: note.public, groups: note.groups ?? [] });
     }
 
     return e;

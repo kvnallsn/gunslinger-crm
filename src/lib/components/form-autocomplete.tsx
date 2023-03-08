@@ -23,9 +23,14 @@ interface Props {
 
     clearOnSelect?: boolean,
 
+    creatable?: boolean,
+
+    initialValue?: any,
+
+    loading?: boolean,
+
     // What to display in the textfield
     getOptionLabel?: (e: any) => string;
-    getListItemLabel?: (e: any) => string;
     isOptionEqualToValue?: (option: any, value: any) => boolean;
 }
 
@@ -43,11 +48,11 @@ function AutocompleteOption(props: HTMLAttributes<HTMLLIElement>, text: string, 
     );
 }
 
-export default function FormAutocomplete({ label, multiple, options, getOptionLabel, isOptionEqualToValue, onChange, error, size, disabled, clearOnSelect }: Props) {
+export default function FormAutocomplete({ label, multiple, options, getOptionLabel, isOptionEqualToValue, onChange, error, size, disabled, clearOnSelect, creatable, initialValue, loading }: Props) {
     const optionText = getOptionLabel ?? ((e) => e);
     const isEqual = isOptionEqualToValue ?? ((o, v) => o === v);
 
-    const [value, setValue] = useState<any | undefined>(multiple ? [] : (clearOnSelect ? undefined : options[0]));
+    const [value, setValue] = useState<any | undefined>(multiple ? [] : (clearOnSelect ? undefined : (initialValue ? initialValue : options[0])));
     const [inputValue, setInputValue] = useState<string>('');
 
     return (
@@ -55,6 +60,8 @@ export default function FormAutocomplete({ label, multiple, options, getOptionLa
             fullWidth
             size={size ?? 'medium'}
             disabled={disabled}
+            freeSolo={creatable ?? false}
+            loading={loading ?? false}
             onChange={(_e, v) => {
                 onChange(v);
                 if (clearOnSelect) {

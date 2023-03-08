@@ -36,6 +36,11 @@ export class Topic implements ITopic {
         });
     }
 
+    static async fetchMany(db: SqlClient, ids: string[]): Promise<Topic[]> {
+        const res = await db.query<Topic>("SELECT * FROM topics WHERE id = ANY($1::uuid[])", [ids]);
+        return res.rows;
+    }
+
     static async fetchAll(db: SqlClient): Promise<Topic[]> {
         const res = await db.query<Topic>('SELECT * FROM topics');
         return res.rows;

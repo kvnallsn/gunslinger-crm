@@ -61,7 +61,7 @@ export function useContacts() {
     const { data, error, isLoading } = useSWR<Contact[]>(`/api/contacts`, fetcher);
 
     return {
-        contacts: data,
+        contacts: data ?? [],
         loading: isLoading,
         error: error
     };

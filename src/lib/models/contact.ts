@@ -1,5 +1,5 @@
 import type { SqlClient } from './db';
-import { Location, Grade, Organization } from '.';
+import { Location, Grade, Organization, User } from '.';
 import { v4 as uuidv4 } from 'uuid';
 import { InferType, object, string } from 'yup';
 import { ContactForm } from '../forms';
@@ -42,6 +42,7 @@ interface IContactMetadata {
 
 interface IContact {
 	id?: string;
+	user_id?: string;
 	last_name: string;
 	first_name: string;
 	grade: Grade;
@@ -56,6 +57,7 @@ interface IContact {
 
 interface IContactView {
 	id: string;
+	user_id?: string;
 	last_name: string;
 	first_name: string;
 	grade_id: string;
@@ -73,6 +75,9 @@ class Contact {
 	// unique identifier
 	id: string;
 
+	// id of user (if linked)
+	user_id?: string;
+
 	// contact bio details
 	last_name: string;
 	first_name: string;
@@ -89,6 +94,7 @@ class Contact {
 
 	constructor({
 		id = uuidv4(),
+		user_id,
 		last_name,
 		first_name,
 		grade,
@@ -101,6 +107,7 @@ class Contact {
 		tags = []
 	}: IContact) {
 		this.id = id;
+		this.user_id = user_id;
 		this.last_name = last_name;
 		this.first_name = first_name;
 		this.grade = grade;
@@ -116,6 +123,7 @@ class Contact {
 	private static fromInterface(c: IContactView): Contact {
 		return new Contact({
 			id: c.id,
+			user_id: c.user_id,
 			last_name: c.last_name,
 			first_name: c.first_name,
 			title: c.title,
@@ -148,9 +156,19 @@ class Contact {
 		return contacts.rows.map(Contact.fromInterface);
 	}
 
+	static async fetchByUser(client: SqlClient, user: User): Promise<Contact> {
+		const contact = await client.query('SELECT * FROM contact_details WHERE user_id = $1', [user.id]);
+		if (contact.rows.length == 0) {
+			throw new Error('no contact found');
+		} else {
+			return this.fromInterface(contact.rows[0]);
+		}
+	}
+
 	toJSON() {
 		return {
 			id: this.id,
+			user_id: this.user_id,
 			last_name: this.last_name,
 			first_name: this.first_name,
 			grade: this.grade.toJSON(),
