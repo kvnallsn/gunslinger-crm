@@ -22,8 +22,9 @@ export default function Contacts() {
         { field: 'last_name', headerName: 'Last Name', flex: 1 },
         { field: 'first_name', headerName: 'First Name ', flex: 1 },
         { field: 'grade', headerName: 'Grade / Rank', flex: 1, valueGetter: params => params.row.grade.name },
+        { field: 'org', headerName: 'Organization', flex: 1, valueGetter: params => params.row.organization.name },
         { field: 'location', headerName: 'Location', flex: 1, valueGetter: params => `${params.row.location.city}, ${params.row.location.state}` },
-        { field: 'org', headerName: 'Organization', flex: 2, valueGetter: params => params.row.organization.name },
+        { field: 'last_contact', headerName: 'Last Contact', flex: 1, type: 'dateTime', valueGetter: params => params.row.last_contact ? new Date(params.row.last_contact) : '' },
         {
             field: 'actions',
             type: 'actions',

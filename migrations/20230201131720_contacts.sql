@@ -44,32 +44,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 	metadata	JSONB
 );
 
-CREATE VIEW contact_details AS
-	SELECT
-		contacts.id,
-		contacts.user_id,
-		contacts.last_name,
-		contacts.first_name,
-		contacts.title,
-		contacts.metadata,
-		grades.id AS grade_id,
-		grades.name AS grade,
-		locations.id AS location_id,
-		locations.city AS city,
-		locations.state AS state,
-		organizations.id AS org_id,
-		organizations.name AS org
-	FROM
-		contacts
-	INNER JOIN
-		grades ON grades.id = contacts.grade
-	INNER JOIN
-		locations ON locations.id = contacts.location
-	INNER JOIN
-		organizations ON organizations.id = contacts.org;
-
 -- +goose Down
-DROP VIEW IF EXISTS contact_details;
 DROP TABLE IF EXISTS contact_phone_types;
 DROP TABLE IF EXISTS contact_email_types;
 DROP TABLE IF EXISTS contacts;

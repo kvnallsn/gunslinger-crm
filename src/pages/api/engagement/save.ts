@@ -18,7 +18,7 @@ async function handleForm(tx: SqlClient, email: string, form: EngagementForm): P
     const user = await User.fetchUserByEmail(tx, email);
 
     // validate contacts
-    const contacts = await Contact.fetchMany(tx, form.contacts);
+    const contacts = await Contact.fetchMany(tx, user.id, form.contacts);
     const userContact = await Contact.fetchByUser(tx, user);
 
     // validate topics

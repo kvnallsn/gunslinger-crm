@@ -49,6 +49,7 @@ interface IContact {
 	location: Location;
 	org: Organization;
 	title: string;
+	last_contact?: Date;
 	phones?: IContactPhone[];
 	emails?: IContactEmail[];
 	socials?: IContactSocial[];
@@ -68,6 +69,7 @@ interface IContactView {
 	org_id: string;
 	org: string;
 	title: string;
+	last_contact?: Date;
 	metadata?: IContactMetadata,
 }
 
@@ -87,6 +89,8 @@ class Contact {
 	title: string;
 	tags: string[];
 
+	last_contact?: Date;
+
 	// contact methods
 	phones: IContactPhone[];
 	emails: IContactEmail[];
@@ -101,6 +105,7 @@ class Contact {
 		location,
 		org,
 		title,
+		last_contact,
 		phones = [],
 		emails = [],
 		socials = [],
@@ -114,6 +119,7 @@ class Contact {
 		this.location = location;
 		this.organization = org;
 		this.title = title;
+		this.last_contact = last_contact;
 		this.emails = emails;
 		this.phones = phones,
 			this.socials = socials;
@@ -127,6 +133,7 @@ class Contact {
 			last_name: c.last_name,
 			first_name: c.first_name,
 			title: c.title,
+			last_contact: c.last_contact,
 			grade: new Grade(c.grade, c.grade_id),
 			location: new Location(c.city, c.state, c.location_id),
 			org: new Organization(c.org, c.org_id),
@@ -137,8 +144,8 @@ class Contact {
 		})
 	}
 
-	static async fetch(client: SqlClient, id: string): Promise<Contact> {
-		const contact = await client.query("SELECT * FROM contact_details WHERE id=$1 LIMIT 1", [id]);
+	static async fetch(client: SqlClient, userId: string, id: string): Promise<Contact> {
+		const contact = await client.query("SELECT * FROM user_contact_details($1) WHERE id=$2 LIMIT 1", [userId, id]);
 		if (contact.rows.length > 0) {
 			return this.fromInterface(contact.rows[0]);
 		} else {
@@ -146,18 +153,18 @@ class Contact {
 		}
 	}
 
-	static async fetchMany(client: SqlClient, ids: string[]): Promise<Contact[]> {
-		const contacts = await client.query("SELECT * FROM contact_details WHERE id = ANY($1::uuid[])", [ids]);
+	static async fetchMany(client: SqlClient, userId: string, ids: string[]): Promise<Contact[]> {
+		const contacts = await client.query("SELECT * FROM user_contact_details($1) WHERE id = ANY($2::uuid[])", [userId, ids]);
 		return contacts.rows.map(r => this.fromInterface(r));
 	}
 
-	static async fetchAll(client: SqlClient) {
-		const contacts = await client.query('SELECT * FROM contact_details');
+	static async fetchAll(client: SqlClient, userId: string) {
+		const contacts = await client.query('SELECT * FROM user_contact_details($1)', [userId]);
 		return contacts.rows.map(Contact.fromInterface);
 	}
 
 	static async fetchByUser(client: SqlClient, user: User): Promise<Contact> {
-		const contact = await client.query('SELECT * FROM contact_details WHERE user_id = $1', [user.id]);
+		const contact = await client.query('SELECT * FROM user_contact_details($1) WHERE user_id = $1', [user.id]);
 		if (contact.rows.length == 0) {
 			throw new Error('no contact found');
 		} else {
@@ -175,6 +182,7 @@ class Contact {
 			location: this.location.toJSON(),
 			organization: this.organization.toJSON(),
 			title: this.title,
+			last_contact: this.last_contact,
 			phones: this.phones,
 			emails: this.emails,
 			socials: this.socials,

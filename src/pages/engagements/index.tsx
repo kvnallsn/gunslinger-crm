@@ -93,8 +93,6 @@ export default function Engagements() {
             flex: 1,
             getActions: params => [
                 <GridActionsCellItem icon={<LaunchIcon />} label="Open Notes" onClick={() => openEngagement(params.row.id)} />,
-                <GridActionsCellItem icon={<EditIcon />} label="Edit" onClick={() => { }} />,
-                <GridActionsCellItem icon={<DeleteIcon />} label="Delete" onClick={() => { }} showInMenu />
             ]
         }
     ];

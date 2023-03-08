@@ -18,6 +18,8 @@ import FormHidden from "@/lib/components/form-hidden";
 import FormAutocomplete from "@/lib/components/form-autocomplete";
 import FormTextField from "@/lib/components/form-textfield";
 import EditSaveBackdrop from '@/lib/components/edit-save-backdrop';
+import { getServerSession, Session } from 'next-auth';
+import { authOptions } from '../api/auth/[...nextauth]';
 
 
 type Props = {
@@ -29,7 +31,7 @@ type Props = {
     form: ContactForm
 }
 
-export async function getServerSideProps({ query }: GetServerSidePropsContext) {
+export async function getServerSideProps({ req, res, query }: GetServerSidePropsContext) {
     let db: SqlClient | undefined;
     let grades: Grade[] = [];
     let orgs: Organization[] = [];
@@ -40,6 +42,12 @@ export async function getServerSideProps({ query }: GetServerSidePropsContext) {
 
     try {
         db = await getDatabaseConn();
+        const session: Session | null = await getServerSession(req, res, authOptions);
+
+        if (!session) {
+            // TODO (do something better)
+            throw new Error('not authenticated!');
+        }
 
         [grades, orgs, locations, systems, networks] = await Promise.all([
             Grade.fetchAll(db),
@@ -54,7 +62,7 @@ export async function getServerSideProps({ query }: GetServerSidePropsContext) {
 
         if ('id' in query) {
             // attempt to fetch existing contact
-            const c = await Contact.fetch(db, String(query['id']));
+            const c = await Contact.fetch(db, session.user.id, String(query['id']));
             form = c.asForm()
         } else {
             // creating a new contact
