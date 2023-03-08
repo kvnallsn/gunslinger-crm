@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS contact_email_types(
 -- stores all contacts/persons of interest
 CREATE TABLE IF NOT EXISTS contacts (
 	id			UUID	PRIMARY KEY NOT NULL,
+	user_id 	UUID 	REFERENCES users(id),
 	last_name 	TEXT 	NOT NULL,
 	first_name 	TEXT 	NOT NULL,
 	grade 		UUID 	NOT NULL REFERENCES grades(id),
@@ -46,6 +47,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 CREATE VIEW contact_details AS
 	SELECT
 		contacts.id,
+		contacts.user_id,
 		contacts.last_name,
 		contacts.first_name,
 		contacts.title,
