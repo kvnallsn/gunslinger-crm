@@ -24,7 +24,7 @@ export default function Contacts() {
         { field: 'grade', headerName: 'Grade / Rank', flex: 1, valueGetter: params => params.row.grade.name },
         { field: 'org', headerName: 'Organization', flex: 1, valueGetter: params => params.row.organization.name },
         { field: 'location', headerName: 'Location', flex: 1, valueGetter: params => `${params.row.location.city}, ${params.row.location.state}` },
-        { field: 'last_contact', headerName: 'Last Contact', flex: 1, type: 'dateTime', valueGetter: params => params.row.last_contact ? new Date(params.row.last_contact) : '' },
+        { field: 'last_contact', headerName: 'Last Engagement', flex: 1, type: 'dateTime', valueGetter: params => params.row.last_contact ? new Date(params.row.last_contact) : '' },
         {
             field: 'actions',
             type: 'actions',
@@ -56,6 +56,11 @@ export default function Contacts() {
                         toolbar: {
                             showQuickFilter: true,
                             quickFilterProps: { debounceMs: 500 },
+                        }
+                    }}
+                    initialState={{
+                        sorting: {
+                            sortModel: [{ field: 'last_contact', sort: 'desc' }]
                         }
                     }}
                 />

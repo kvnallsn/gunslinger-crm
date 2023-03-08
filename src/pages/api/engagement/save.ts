@@ -27,6 +27,7 @@ async function handleForm(tx: SqlClient, email: string, form: EngagementForm): P
     // create engagement
     const e = new Engagement({
         user: user,
+        method: form.method,
         date: form.date,
         contacts: [...contacts, userContact],
         topics: topics,

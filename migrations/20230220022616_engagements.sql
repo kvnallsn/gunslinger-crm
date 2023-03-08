@@ -6,8 +6,14 @@ CREATE TABLE IF NOT EXISTS topics(
     topic       TEXT            NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS engagement_methods(
+    id          UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
+    name        TEXT            NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS engagements(
     id          UUID            PRIMARY KEY NOT NULL,
+    method      UUID            NOT NULL REFERENCES engagement_methods(id),
     date        TIMESTAMPTZ     NOT NULL DEFAULT 'now()',
 	created_by  UUID 	        NOT NULL REFERENCES users(id),
     created     TIMESTAMPTZ     NOT NULL DEFAULT 'now()',
@@ -48,5 +54,6 @@ DROP TABLE IF EXISTS engagement_topics;
 DROP TABLE IF EXISTS engagement_notes;
 DROP TABLE IF EXISTS engagement_contacts;
 DROP TABLE IF EXISTS engagements;
+DROP TABLE IF EXISTS engagement_methods;
 DROP TABLE IF EXISTs topics;
 -- +goose StatementEnd

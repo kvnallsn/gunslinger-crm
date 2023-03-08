@@ -5,6 +5,11 @@ import { SqlClient } from '../db';
 import { Topic } from './topic';
 import User from './user';
 
+export interface EngagementMethod {
+    id: string;
+    name: string;
+}
+
 interface EngagementContact {
     id: string;
     org_id: string;
@@ -45,6 +50,7 @@ export interface EngagementNote {
 interface NewEngagement {
     id?: string;
     user: User;
+    method: EngagementMethod,
     date: Date;
     contacts: Contact[];
     topics: Topic[];
@@ -54,6 +60,7 @@ class Engagement {
     id: string;
     created_by: string;
     username: string;
+    method: EngagementMethod;
     date: Date;
     created: Date;
     modified: Date;
@@ -65,6 +72,7 @@ class Engagement {
         this.id = e.id || uuidv4();
         this.created_by = e.user.id;
         this.username = e.user.username;
+        this.method = e.method;
         this.date = e.date;
         this.created = new Date();
         this.modified = new Date();
@@ -85,28 +93,20 @@ class Engagement {
         this.topics = e.topics.map((t: Topic) => ({ id: t.id, topic: t.topic }));
     }
 
+    static async Methods(db: SqlClient): Promise<EngagementMethod[]> {
+        const res = await db.query<EngagementMethod>('SELECT * FROM engagement_methods ORDER BY name ASC');
+        return res.rows;
+    }
+
     // db: open database connection
     // id: user's unique id
     static async fetchAll(db: SqlClient, id: string): Promise<Engagement[]> {
-        const res = await db.query<Engagement>(`
-            SELECT
-                *
-            FROM
-                engagement_details
-        `);
+        const res = await db.query<Engagement>('SELECT * FROM engagement_details');
         return res.rows;
     }
 
     static async fetch(db: SqlClient, userId: string, id: string): Promise<Engagement> {
-        const res = await db.query<Engagement>(`
-            SELECT
-                *
-            FROM
-                engagement_details
-            WHERE
-                id = $1
-            LIMIT 1
-        `, [id]);
+        const res = await db.query<Engagement>('SELECT * FROM engagement_details WHERE id = $1 LIMIT 1', [id]);
         return res.rows[0];
     }
 
@@ -159,16 +159,16 @@ class Engagement {
     async save(tx: SqlClient) {
         await tx.query(`
             INSERT INTO engagements
-                (id, created_by, date, created, modified)
+                (id, created_by, method, date, created, modified)
             VALUES
-                ($1, $2, $3, $4, $5)
+                ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (id)
                 DO UPDATE
             SET
                 date=EXCLUDED.date,
                 modified=now()
         `,
-            [this.id, this.created_by, this.date, this.created, this.modified]);
+            [this.id, this.created_by, this.method.id, this.date, this.created, this.modified]);
 
         // next insert all contacts
         for (var contact of this.contacts) {

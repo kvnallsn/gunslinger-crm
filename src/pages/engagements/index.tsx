@@ -54,7 +54,7 @@ export default function Engagements() {
     }
 
     const columns: GridColumns<Engagement> = [
-        { field: 'date', headerName: 'Date/Time', type: 'dateTime', flex: 1, valueGetter: v => v && new Date(v.row.date) },
+        { field: 'date', headerName: 'Date/Time', type: 'dateTime', flex: 2, valueGetter: v => v && new Date(v.row.date) },
         { field: 'username', headerName: 'Created By', flex: 1 },
         {
             field: 'topics', headerName: 'Topics', flex: 3, renderCell: params => (
@@ -86,6 +86,7 @@ export default function Engagements() {
             }],
             sortable: false
         },
+        { field: 'method', headerName: 'Method', flex: 1, valueGetter: (params: GridCellParams) => params.row.method.name },
         {
             field: 'actions',
             type: 'actions',
@@ -108,6 +109,11 @@ export default function Engagements() {
                     toolbar: {
                         showQuickFilter: true,
                         quickFilterProps: { debounceMs: 500 },
+                    }
+                }}
+                initialState={{
+                    sorting: {
+                        sortModel: [{ field: 'date', sort: 'desc' }]
                     }
                 }}
             />

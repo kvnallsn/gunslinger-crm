@@ -124,8 +124,8 @@ export default function EngagementDetail() {
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <AppBar position="static" color="secondary">
                     <Toolbar variant="dense">
-                        <Typography variant="caption" component="i" sx={{ pr: 2 }}>ENGAGEMENT</Typography>
-                        <Typography variant="caption" sx={{ pl: 2 }}>{formatDate(engagement?.date)}</Typography>
+                        <Typography variant="subtitle2" sx={{ pr: 2 }}>{engagement?.method.name}</Typography>
+                        <Typography variant="caption">{formatDate(engagement?.date)}</Typography>
                         <Box sx={{ flexGrow: 1 }} />
                     </Toolbar>
                 </AppBar>
@@ -149,6 +149,6 @@ export default function EngagementDetail() {
                     </Section>
                 </Box>
             </Box>
-        </Box>
+        </Box >
     )
 }

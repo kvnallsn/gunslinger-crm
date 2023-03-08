@@ -22,9 +22,10 @@ import { getDatabaseConn } from "@/lib/db";
 import FormSentiment from '@/lib/components/form-sentiment';
 import EditSaveBackdrop from '@/lib/components/edit-save-backdrop';
 import { Topic } from "@/lib/models/topic";
+import Engagement, { EngagementMethod } from '@/lib/models/engagement';
 
 type Props = {
-    engagements: string[];
+    methods: EngagementMethod[];
     groups: { id: string; name: string; level: string }[];
     createdBy: string;
     createdById: string;
@@ -44,11 +45,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
     const db = await getDatabaseConn();
     const user: User = await User.fetchUserByUsername(db, session.user.username);
+    const methods: EngagementMethod[] = await Engagement.Methods(db);
     db.release();
 
     return {
         props: {
-            engagements: ['Phone', 'Email', 'Text / SMS', 'Meeting', 'Conference'],
+            methods: methods,
             groups: user.groups,
             createdBy: session.user.username,
             createdById: session.user.id,
@@ -66,7 +68,7 @@ function EmptyView() {
     );
 }
 
-export default function EditEngagement({ engagements, groups, createdBy, createdById }: Props) {
+export default function EditEngagement({ methods, groups, createdBy, createdById }: Props) {
     const { contacts, loading, error } = useContacts();
     const [backdrop, setBackdrop] = useState<string | null>(null);
     const [sentimentValue, setSentimentValue] = useState<number>(50);
@@ -76,7 +78,7 @@ export default function EditEngagement({ engagements, groups, createdBy, created
 
     const { handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<EngagementForm>({
         mode: 'onSubmit',
-        defaultValues: NewEngagementForm(engagements[0]),
+        defaultValues: NewEngagementForm(methods[0]),
         resolver: yupResolver(EngagementFormSchema)
     });
 
@@ -161,11 +163,12 @@ export default function EditEngagement({ engagements, groups, createdBy, created
 
                         <Grid item xs={12} sm={3}>
                             <FormAutocomplete
-                                label="Engagement Type"
-                                options={engagements}
-                                isOptionEqualToValue={(o, v) => o === v}
-                                onChange={v => setValue('ty', v)}
-                                error={errors['ty']}
+                                label="Method"
+                                options={methods}
+                                isOptionEqualToValue={(o, v) => o.id === v.id}
+                                getOptionLabel={(m: EngagementMethod) => m.name}
+                                onChange={(v: EngagementMethod) => setValue('method', v)}
+                                error={errors['method']}
                             />
                         </Grid>
 
@@ -175,7 +178,7 @@ export default function EditEngagement({ engagements, groups, createdBy, created
                                 multiple
                                 options={contacts.filter((c: Contact) => c.user_id === undefined || c.user_id !== createdById)}
                                 isOptionEqualToValue={(o: Contact, v: Contact) => o.id === v.id}
-                                getOptionLabel={(c: Contact) => `${c.first_name} ${c.last_name} (${c.grade.name})`}
+                                getOptionLabel={(c: Contact) => `${c.first_name} ${c.last_name} (${c.organization.name})`}
                                 onChange={values => setValue('contacts', values.map((v: Contact) => v.id))}
                                 error={errors['contacts']}
                             />

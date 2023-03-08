@@ -262,6 +262,10 @@ CREATE VIEW engagement_details AS
     )
     SELECT
         engagements.id,
+        jsonb_build_object(
+            'id', engagement_methods.id,
+            'name', engagement_methods.name
+        ) AS method,
         engagements.created_by,
         users.username,
         engagements.date,
@@ -273,20 +277,19 @@ CREATE VIEW engagement_details AS
         engagements
     INNER JOIN
         users
-        ON
-            users.id = created_by
+        ON users.id = created_by
+    INNER JOIN
+        engagement_methods
+        ON engagement_methods.id = engagements.method
     INNER JOIN
         engagement_contact_details
-        ON
-            engagement_contact_details.engagement_id = engagements.id
+        ON engagement_contact_details.engagement_id = engagements.id
     INNER JOIN
         engagement_orgs
-        ON
-            engagement_orgs.engagement_id = engagements.id
+        ON engagement_orgs.engagement_id = engagements.id
     INNER JOIN
         eg_topics
-        ON
-            eg_topics.engagement_id = engagements.id;
+        ON eg_topics.engagement_id = engagements.id;
 -- +goose StatementEnd
 
 -- +goose Down
