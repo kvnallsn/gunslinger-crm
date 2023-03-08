@@ -2,6 +2,7 @@ import { AddToQueue } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 import { Contact } from '.';
 import { SqlClient } from '../db';
+import { Topic } from './topic';
 import User from './user';
 
 interface EngagementContact {
@@ -11,13 +12,6 @@ interface EngagementContact {
     grade: string;
     lastName: string;
     firstName: string;
-}
-
-export interface Topic {
-    id: string;
-    created_by: string;
-    created: Date;
-    topic: string;
 }
 
 export interface EngagementTopic {

@@ -138,7 +138,7 @@ export default function EngagementDetail() {
 
                     <Section title="Contacts">
                         <Grid container spacing={2} sx={{ p: 1 }}>
-                            {engagement?.contacts.map(c => <Grid key={`eg - c - ${c.id} `} item xs={12} sm={4} md={3} lg={2} xl={1}><EngagementCard contact={c} /></Grid>)}
+                            {engagement?.contacts.map(c => <Grid key={`eg - c - ${c.id} `} item xs={12} sm={4} md={3} lg={2}><EngagementCard contact={c} /></Grid>)}
                         </Grid>
                     </Section>
 
