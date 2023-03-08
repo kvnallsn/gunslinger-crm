@@ -1,4 +1,3 @@
-import { TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { Control, Controller } from "react-hook-form";
 
@@ -22,7 +21,9 @@ export default function FormDatepicker({ field, control, label }: Props) {
                 <DatePicker
                     {...field}
                     label={label}
-                    renderInput={params => <TextField fullWidth {...params} />}
+                    slotProps={{
+                        textField: { fullWidth: true }
+                    }}
                 />
             )}
         />
