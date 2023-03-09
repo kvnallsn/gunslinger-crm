@@ -1,11 +1,12 @@
 import LoadingBackdrop from '@/lib/components/loading-backdrop';
 import { useEngagement, useEngagementNotes } from '@/lib/utils/hooks';
-import { AppBar, Avatar, Box, Card, CardContent, CardHeader, Chip, Grid, Paper, TextField, Toolbar, Typography } from "@mui/material";
+import { AppBar, Avatar, Box, Button, Card, CardContent, CardHeader, Chip, Grid, Paper, Skeleton, TextField, Toolbar, Typography } from "@mui/material";
 import { useTheme } from '@mui/system';
 import { useRouter } from 'next/router';
+import { green, orange, grey } from '@mui/material/colors';
 import PublicIcon from '@mui/icons-material/Public';
 import LockIcon from '@mui/icons-material/Lock';
-import { green, orange, grey } from '@mui/material/colors';
+import InfoIcon from '@mui/icons-material/Info';
 
 function TabPanel(props: any) {
     const { name, children, value, index, ...other } = props;
@@ -119,10 +120,47 @@ export default function EngagementDetail() {
     }
 
     if (loading) {
-        return <LoadingBackdrop open={true} />;
+        return (
+            <Box sx={{ height: '100%' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <AppBar position="static" color="secondary">
+                        <Toolbar variant="dense">
+                            <Skeleton variant="text" sx={{ pr: 2, width: '160px' }} />
+                        </Toolbar>
+                    </AppBar>
+                    <Box sx={{ m: 2, flexGrow: 1 }}>
+                        <Section title="Topics">
+                            <Box sx={{ display: 'flex', columnGap: '1em', p: 1 }}>
+                                <Skeleton variant="circular" width={40} height={40} />
+                                <Skeleton variant="rectangular" width={210} height={40} />
+                            </Box>
+                        </Section>
+
+                        <Section title="Participants">
+                            <Box sx={{ display: 'flex', columnGap: '1em', p: 1 }}>
+                                <Skeleton variant="circular" width={40} height={40} />
+                                <Skeleton variant="rectangular" width={210} height={40} />
+                            </Box>
+                        </Section>
+
+                        <Section title="Summary">
+                            <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '1em', p: 1 }}>
+                                <Skeleton variant="rectangular" width={610} height={80} />
+                                <Skeleton variant="rectangular" width={610} height={20} />
+                                <Skeleton variant="rectangular" width={610} height={20} />
+                            </Box>
+                        </Section>
+                    </Box>
+                </Box>
+            </Box>
+        );
     } else if (engagement === undefined) {
         return (
-            <Box>Not Found</Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', rowGap: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <InfoIcon color='warning' fontSize='large' />
+                <Typography component='i' sx={{ color: 'text.secondary' }}>Engagement Not Found</Typography>
+                <Button variant='contained' onClick={() => router.back()}>Go Back</Button>
+            </Box>
         );
     }
 
@@ -162,7 +200,14 @@ export default function EngagementDetail() {
 
                     <Section title="Notes">
                         <Grid container rowSpacing={2} sx={{ p: 1 }}>
-                            {notes?.map(note => <Grid key={`eg - n - ${note.id} `} item xs={12}><EngagementNote note={note} /></Grid>)}
+                            {!notes || notes.length == 0 ?
+                                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'center', alignItems: 'center', p: 8 }}>
+                                    <InfoIcon color='inherit' fontSize='large' sx={{ mb: 1 }} />
+                                    <Typography component='i' sx={{ color: 'text.secondary' }}>No Notes Found</Typography>
+                                </Box>
+                                :
+                                notes?.map(note => <Grid key={`eg - n - ${note.id} `} item xs={12}><EngagementNote note={note} /></Grid>)
+                            }
                         </Grid>
                     </Section>
                 </Box>
