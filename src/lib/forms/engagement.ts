@@ -36,7 +36,6 @@ const EngagementFormSchema = object().shape({
     notes: array()
         .of(object({
             text: string().required(),
-            public: boolean().required().default(false),
             groups: array().of(string().uuid().required())
         }))
 });

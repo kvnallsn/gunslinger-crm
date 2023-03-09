@@ -38,7 +38,7 @@ async function handleForm(tx: SqlClient, email: string, form: EngagementForm): P
     await e.save(tx);
 
     for (var note of (form.notes ?? [])) {
-        await e.addNote(tx, { text: note.text, created_by: user, public: note.public, groups: note.groups ?? [] });
+        await e.addNote(tx, { text: note.text, created_by: user, groups: note.groups ?? [] });
     }
 
     return e;

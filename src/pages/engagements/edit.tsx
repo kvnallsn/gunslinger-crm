@@ -86,7 +86,6 @@ export default function EditEngagement({ methods, groups, createdBy, createdById
 
     const onSubmit: SubmitHandler<EngagementForm> = async data => {
         setBackdrop('save');
-        console.log(data);
 
         const resp = await fetch(`/api/engagement/save`, {
             method: 'POST',
@@ -208,7 +207,7 @@ export default function EditEngagement({ methods, groups, createdBy, createdById
                             <Divider />
                             <Box sx={{ display: 'flex', mt: 1 }}>
                                 <Typography variant='h6' sx={{ flexGrow: 1 }}>Notes</Typography>
-                                <IconButton onClick={() => notes.append({ text: '', public: false })}>
+                                <IconButton onClick={() => notes.append({ text: '' })}>
                                     <AddIcon />
                                 </IconButton>
                             </Box>
@@ -218,11 +217,9 @@ export default function EditEngagement({ methods, groups, createdBy, createdById
                         {notes.fields.map((note, index) => (
                             <Grid item xs={12} key={`note-${index}`}>
                                 <Box sx={{ display: 'flex', mb: 1 }}>
-                                    <FormCheckbox control={control} field={`notes.${index}.public`} label="Public" />
                                     <FormAutocomplete
                                         multiple
                                         options={groups}
-                                        disabled={watch(`notes.${index}.public`)}
                                         size="small"
                                         label="Groups"
                                         getOptionLabel={g => g.name}

@@ -32,7 +32,6 @@ export interface EngagementOrg {
 export interface NewEngagementNote {
     created_by: User;
     text: string;
-    public: boolean;
     groups?: string[];
 }
 
@@ -41,7 +40,6 @@ export interface EngagementNote {
     engagement_id: string;
     created_by: string;
     username: string;
-    public: boolean;
     note: string;
     groups: string[];
     group_names: string[];
@@ -125,11 +123,7 @@ class Engagement {
             WHERE
                 engagement_id = $1
                 AND
-                (
-                    groups && (SELECT memberof FROM user_groups WHERE user_id = $2)
-                    OR
-                    public = true
-                )
+                groups && (SELECT memberof FROM user_groups WHERE user_id = $2)
         `,
             [id, userId]);
 
@@ -208,15 +202,14 @@ class Engagement {
 
         await tx.query(`
             INSERT INTO engagement_notes
-                (id, engagement_id, created_by, public, note)
+                (id, engagement_id, created_by, note)
             VALUES
-                ($1, $2, $3, $4, $5)
+                ($1, $2, $3, $4)
             ON CONFLICT (id)
                 DO UPDATE
                 SET
-                    public = excluded.public,
                     note = excluded.note
-        `, [noteId, this.id, note.created_by.id, note.public, note.text]);
+        `, [noteId, this.id, note.created_by.id, note.text]);
 
         for (var group of note.groups ?? []) {
             await tx.query(`

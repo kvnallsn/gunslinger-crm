@@ -229,7 +229,6 @@ CREATE VIEW engagement_note_details AS
         engagement_notes.engagement_id,
         engagement_notes.created_by,
         users.username,
-        engagement_notes.public,
         engagement_notes.note,
         perms.groups,
         perms.group_names

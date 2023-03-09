@@ -39,7 +39,6 @@ CREATE TABLE IF NOT EXISTS engagement_notes(
     id              UUID        PRIMARY KEY NOT NULL,
     engagement_id   UUID        NOT NULL REFERENCES engagements(id),
     created_by      UUID        NOT NULL REFERENCES users(id),
-    public          BOOLEAN     NOT NULL DEFAULT true,
     note            TEXT        NOT NULL
 );
 
