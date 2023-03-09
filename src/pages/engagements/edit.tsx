@@ -150,11 +150,10 @@ export default function EditEngagement({ methods, groups, createdBy, createdById
                     <FormHidden field="id" control={control} />
                     <Grid container spacing={{ xs: 2, md: 3 }}>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                disabled
-                                fullWidth
-                                value={createdBy}
-                                label="Creator"
+                            <FormTextField
+                                label="Title"
+                                field='title'
+                                control={control}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>

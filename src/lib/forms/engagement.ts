@@ -1,3 +1,4 @@
+import { title } from 'process';
 import { object, string, InferType, array, Schema, date, boolean } from 'yup';
 import { EngagementMethod } from '../models/engagement';
 
@@ -13,6 +14,10 @@ const EngagementFormSchema = object().shape({
 
     date: date()
         .required("A date/time is required"),
+
+    title: string()
+        .required()
+        .min(2),
 
     method: object({
         id: string().required().uuid(),
@@ -39,6 +44,7 @@ function NewEngagementForm(method: EngagementMethod): EngagementForm {
         topics: [],
         date: new Date(),
         method: method,
+        title: '',
         contacts: [],
         notes: [],
     }

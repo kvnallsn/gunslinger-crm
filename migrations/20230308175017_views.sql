@@ -262,6 +262,7 @@ CREATE VIEW engagement_details AS
     )
     SELECT
         engagements.id,
+        engagements.title,
         jsonb_build_object(
             'id', engagement_methods.id,
             'name', engagement_methods.name

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS engagement_methods(
 CREATE TABLE IF NOT EXISTS engagements(
     id          UUID            PRIMARY KEY NOT NULL,
     method      UUID            NOT NULL REFERENCES engagement_methods(id),
+    title       TEXT            NOT NULL,
     date        TIMESTAMPTZ     NOT NULL DEFAULT 'now()',
 	created_by  UUID 	        NOT NULL REFERENCES users(id),
     created     TIMESTAMPTZ     NOT NULL DEFAULT 'now()',

@@ -56,6 +56,7 @@ export default function Engagements() {
     const columns: GridColumns<Engagement> = [
         { field: 'date', headerName: 'Date/Time', type: 'dateTime', flex: 2, valueGetter: v => v && new Date(v.row.date) },
         { field: 'username', headerName: 'Created By', flex: 1 },
+        { field: 'title', headerName: 'Title', flex: 2 },
         {
             field: 'topics', headerName: 'Topics', flex: 3, renderCell: params => (
                 <Box sx={{ display: 'flex', columnGap: '1em', overflowX: 'hidden' }}>
