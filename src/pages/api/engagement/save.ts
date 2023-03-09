@@ -29,6 +29,7 @@ async function handleForm(tx: SqlClient, email: string, form: EngagementForm): P
         user: user,
         method: form.method,
         title: form.title,
+        summary: form.summary,
         date: form.date,
         contacts: [...contacts, userContact],
         topics: topics,

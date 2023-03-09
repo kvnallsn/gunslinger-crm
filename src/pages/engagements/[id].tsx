@@ -118,29 +118,46 @@ export default function EngagementDetail() {
         }
     }
 
+    if (loading) {
+        return <LoadingBackdrop open={true} />;
+    } else if (engagement === undefined) {
+        return (
+            <Box>Not Found</Box>
+        );
+    }
+
     return (
         <Box sx={{ height: '100%' }}>
-            <LoadingBackdrop open={loading} />
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <AppBar position="static" color="secondary">
                     <Toolbar variant="dense">
-                        <Typography variant='subtitle2' sx={{ pr: 2 }}>{engagement?.title}</Typography>
-                        <Typography variant="caption" sx={{ pr: 2 }}>{engagement?.method.name}</Typography>
-                        <Typography variant="caption">{formatDate(engagement?.date)}</Typography>
+                        <Typography variant='subtitle2' sx={{ pr: 2 }}>{engagement.title}</Typography>
+                        <Typography variant="caption" sx={{ pr: 2 }}>{engagement.method.name}</Typography>
+                        <Typography variant="caption">{formatDate(engagement.date)}</Typography>
                         <Box sx={{ flexGrow: 1 }} />
                     </Toolbar>
                 </AppBar>
                 <Box sx={{ m: 2, flexGrow: 1 }}>
                     <Section title="Topics">
                         <Box sx={{ display: 'flex', columnGap: '1em', p: 1 }}>
-                            {engagement?.topics.map(t => <EngagementTopic key={`t-${t.id}`} topic={t} />)}
+                            {engagement.topics.map(t => <EngagementTopic key={`t-${t.id}`} topic={t} />)}
                         </Box>
                     </Section>
 
                     <Section title="Participants">
                         <Grid container spacing={2} sx={{ p: 1 }}>
-                            {engagement?.contacts.map(c => <Grid key={`eg - c - ${c.id} `} item xs={12} sm={4} md={3} lg={2}><EngagementCard contact={c} /></Grid>)}
+                            {engagement.contacts.map(c => <Grid key={`eg - c - ${c.id} `} item xs={12} sm={4} md={3} lg={2}><EngagementCard contact={c} /></Grid>)}
                         </Grid>
+                    </Section>
+
+                    <Section title="Summary">
+                        <TextField
+                            fullWidth
+                            value={engagement.summary}
+                            inputProps={{ readOnly: true }}
+                            multiline
+                            rows={5}
+                        />
                     </Section>
 
                     <Section title="Notes">

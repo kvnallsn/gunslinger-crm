@@ -267,6 +267,7 @@ CREATE VIEW engagement_details AS
             'id', engagement_methods.id,
             'name', engagement_methods.name
         ) AS method,
+        engagements.summary,
         engagements.created_by,
         users.username,
         engagements.date,

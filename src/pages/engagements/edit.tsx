@@ -196,6 +196,15 @@ export default function EditEngagement({ methods, groups, createdBy, createdById
                         </Grid>
 
                         <Grid item xs={12}>
+                            <FormTextField
+                                field='summary'
+                                label="Summary"
+                                control={control}
+                                rows={5}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
                             <Divider />
                             <Box sx={{ display: 'flex', mt: 1 }}>
                                 <Typography variant='h6' sx={{ flexGrow: 1 }}>Notes</Typography>

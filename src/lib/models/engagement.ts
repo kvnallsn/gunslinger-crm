@@ -53,6 +53,7 @@ interface NewEngagement {
     method: EngagementMethod,
     title: string;
     date: Date;
+    summary: string;
     contacts: Contact[];
     topics: Topic[];
 }
@@ -64,6 +65,7 @@ class Engagement {
     method: EngagementMethod;
     title: string;
     date: Date;
+    summary: string;
     created: Date;
     modified: Date;
     contacts: EngagementContact[];
@@ -77,6 +79,7 @@ class Engagement {
         this.method = e.method;
         this.title = e.title;
         this.date = e.date;
+        this.summary = e.summary;
         this.created = new Date();
         this.modified = new Date();
         this.contacts = e.contacts.map(c => ({
@@ -162,16 +165,16 @@ class Engagement {
     async save(tx: SqlClient) {
         await tx.query(`
             INSERT INTO engagements
-                (id, created_by, method, title, date, created, modified)
+                (id, created_by, method, title, date, summary, created, modified)
             VALUES
-                ($1, $2, $3, $4, $5, $6, $7)
+                ($1, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT (id)
                 DO UPDATE
             SET
                 date=EXCLUDED.date,
                 modified=now()
         `,
-            [this.id, this.created_by, this.method.id, this.title, this.date, this.created, this.modified]);
+            [this.id, this.created_by, this.method.id, this.title, this.date, this.summary, this.created, this.modified]);
 
         // next insert all contacts
         for (var contact of this.contacts) {

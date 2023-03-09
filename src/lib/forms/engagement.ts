@@ -25,6 +25,10 @@ const EngagementFormSchema = object().shape({
     })
         .required(),
 
+    summary: string()
+        .required()
+        .min(30, '30 character minimum'),
+
     contacts: array()
         .required('at least on contact must be specified')
         .of(string().required().uuid()),
@@ -45,6 +49,7 @@ function NewEngagementForm(method: EngagementMethod): EngagementForm {
         date: new Date(),
         method: method,
         title: '',
+        summary: '',
         contacts: [],
         notes: [],
     }
