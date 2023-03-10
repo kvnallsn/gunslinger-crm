@@ -175,6 +175,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                             <FormAutocomplete
                                 label="Rank / Grade"
                                 options={grades}
+                                initialValue={form.grade}
                                 getOptionLabel={grade => grade.name}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
                                 onChange={v => setValue('grade', v)}
@@ -191,6 +192,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                             <FormAutocomplete
                                 label="Location"
                                 options={locations}
+                                initialValue={form.location}
                                 getOptionLabel={l => l.id === BLANK_UUID ? 'New Location' : `${l.city}, ${l.state}`}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
                                 onChange={v => setValue('location', v)}
@@ -208,6 +210,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                             <FormAutocomplete
                                 label="Organization"
                                 options={orgs}
+                                initialValue={form.org}
                                 getOptionLabel={o => o.id === BLANK_UUID ? 'New Organization' : `${o.name}`}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
                                 onChange={v => setValue('org', v)}

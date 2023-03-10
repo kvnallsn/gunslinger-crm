@@ -33,13 +33,6 @@ interface IContactSocial {
 	username: string;
 }
 
-interface IContactMetadata {
-	phones?: IContactPhone[];
-	emails?: IContactEmail[];
-	social?: IContactSocial[];
-	tags?: string[];
-}
-
 interface IContact {
 	id?: string;
 	user_id?: string;
@@ -52,25 +45,6 @@ interface IContact {
 	last_contact?: Date;
 	phones?: IContactPhone[];
 	emails?: IContactEmail[];
-	socials?: IContactSocial[];
-	tags?: string[];
-}
-
-interface IContactView {
-	id: string;
-	user_id?: string;
-	last_name: string;
-	first_name: string;
-	grade_id: string;
-	grade: string;
-	location_id: string;
-	city: string;
-	state: string;
-	org_id: string;
-	org: string;
-	title: string;
-	last_contact?: Date;
-	metadata?: IContactMetadata,
 }
 
 class Contact {
@@ -85,16 +59,13 @@ class Contact {
 	first_name: string;
 	grade: Grade;
 	location: Location;
-	organization: Organization;
+	org: Organization;
 	title: string;
-	tags: string[];
-
 	last_contact?: Date;
 
 	// contact methods
 	phones: IContactPhone[];
 	emails: IContactEmail[];
-	socials: IContactSocial[];
 
 	constructor({
 		id = uuidv4(),
@@ -108,8 +79,6 @@ class Contact {
 		last_contact,
 		phones = [],
 		emails = [],
-		socials = [],
-		tags = []
 	}: IContact) {
 		this.id = id;
 		this.user_id = user_id;
@@ -117,50 +86,30 @@ class Contact {
 		this.first_name = first_name;
 		this.grade = grade;
 		this.location = location;
-		this.organization = org;
+		this.org = org;
 		this.title = title;
 		this.last_contact = last_contact;
 		this.emails = emails;
-		this.phones = phones,
-			this.socials = socials;
-		this.tags = tags;
-	}
-
-	private static fromInterface(c: IContactView): Contact {
-		return new Contact({
-			id: c.id,
-			user_id: c.user_id,
-			last_name: c.last_name,
-			first_name: c.first_name,
-			title: c.title,
-			last_contact: c.last_contact,
-			grade: new Grade(c.grade, c.grade_id),
-			location: new Location(c.city, c.state, c.location_id),
-			org: new Organization(c.org, c.org_id),
-			phones: c.metadata?.phones ?? [],
-			emails: c.metadata?.emails ?? [],
-			socials: c.metadata?.social ?? [],
-			tags: c.metadata?.tags ?? [],
-		})
+		this.phones = phones;
 	}
 
 	static async fetch(client: SqlClient, userId: string, id: string): Promise<Contact> {
-		const contact = await client.query("SELECT * FROM user_contact_details($1) WHERE id=$2 LIMIT 1", [userId, id]);
+		const contact = await client.query<Contact>("SELECT * FROM user_contact_details($1) WHERE id=$2 LIMIT 1", [userId, id]);
 		if (contact.rows.length > 0) {
-			return this.fromInterface(contact.rows[0]);
+			return new Contact(contact.rows[0]);
 		} else {
 			throw new Error(`Contact not found, id = ${id}`);
 		}
 	}
 
 	static async fetchMany(client: SqlClient, userId: string, ids: string[]): Promise<Contact[]> {
-		const contacts = await client.query("SELECT * FROM user_contact_details($1) WHERE id = ANY($2::uuid[])", [userId, ids]);
-		return contacts.rows.map(r => this.fromInterface(r));
+		const contacts = await client.query<Contact>("SELECT * FROM user_contact_details($1) WHERE id = ANY($2::uuid[])", [userId, ids]);
+		return contacts.rows.map(c => new Contact(c));
 	}
 
-	static async fetchAll(client: SqlClient, userId: string) {
-		const contacts = await client.query('SELECT * FROM user_contact_details($1)', [userId]);
-		return contacts.rows.map(Contact.fromInterface);
+	static async fetchAll(client: SqlClient, userId: string): Promise<Contact[]> {
+		const contacts = await client.query<Contact>('SELECT * FROM user_contact_details($1)', [userId]);
+		return contacts.rows.map(c => new Contact(c));
 	}
 
 	static async fetchByUser(client: SqlClient, user: User): Promise<Contact> {
@@ -168,7 +117,7 @@ class Contact {
 		if (contact.rows.length == 0) {
 			throw new Error('no contact found');
 		} else {
-			return this.fromInterface(contact.rows[0]);
+			return new Contact(contact.rows[0]);
 		}
 	}
 
@@ -178,15 +127,13 @@ class Contact {
 			user_id: this.user_id,
 			last_name: this.last_name,
 			first_name: this.first_name,
-			grade: this.grade.toJSON(),
-			location: this.location.toJSON(),
-			organization: this.organization.toJSON(),
+			grade: this.grade,
+			location: this.location,
+			org: this.org,
 			title: this.title,
 			last_contact: this.last_contact,
 			phones: this.phones,
 			emails: this.emails,
-			socials: this.socials,
-			tags: this.tags,
 		};
 	}
 
@@ -196,9 +143,9 @@ class Contact {
 			lastName: this.last_name,
 			firstName: this.first_name,
 			title: this.title,
-			grade: this.grade.toJSON(),
-			location: this.location.toJSON(),
-			org: this.organization.toJSON(),
+			grade: this.grade,
+			location: this.location,
+			org: this.org,
 			phones: this.phones,
 			emails: this.emails
 		}
@@ -208,7 +155,7 @@ class Contact {
 		// update contact record
 		await client.query(`
 			INSERT INTO
-				contacts (id, last_name, first_name, grade, location, org, title, metadata)
+				contacts (id, last_name, first_name, grade, location, org, title)
 			VALUES
 				($1, $2, $3, $4, $5, $6, $7, $8)
 			ON CONFLICT(id) DO UPDATE
@@ -217,9 +164,7 @@ class Contact {
 				first_name = EXCLUDED.first_name,
 				grade = EXCLUDED.grade,
 				location = EXCLUDED.location,
-				org = EXCLUDED.org,
-				title = EXCLUDED.title,
-				metadata = EXCLUDED.metadata
+				org = EXCLUDED.org
 			`,
 			[
 				this.id,
@@ -227,9 +172,8 @@ class Contact {
 				this.first_name,
 				this.grade.id,
 				this.location.id,
-				this.organization.id,
+				this.org.id,
 				this.title,
-				{ emails: this.emails, phones: this.phones, socials: this.socials, tags: this.tags }
 			]
 		)
 	}

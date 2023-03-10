@@ -95,20 +95,58 @@ CREATE VIEW user_engagements AS
         contacts.user_id IS NOT NULL;
 
 CREATE VIEW contact_details AS
+    WITH phones AS (
+        SELECT
+            contact_id,
+            json_agg(jsonb_build_object(
+                'id', system_id,
+                'system', name,
+                'number', number
+            )) AS phones
+        FROM
+            contact_phones
+        INNER JOIN
+            contact_phone_types
+            ON contact_phone_types.id = system_id
+        GROUP BY
+            contact_id
+    ), emails AS (
+        SELECT
+            contact_id,
+            json_agg(jsonb_build_object(
+                'id', system_id,
+                'system', name,
+                'address', address
+            )) AS emails
+        FROM
+            contact_emails
+        INNER JOIN
+            contact_email_types
+            ON contact_email_types.id = system_id
+        GROUP BY
+            contact_id
+    )
 	SELECT
 		contacts.id,
 		contacts.user_id,
 		contacts.last_name,
 		contacts.first_name,
 		contacts.title,
-		contacts.metadata,
-		grades.id AS grade_id,
-		grades.name AS grade,
-		locations.id AS location_id,
-		locations.city AS city,
-		locations.state AS state,
-		organizations.id AS org_id,
-		organizations.name AS org
+        jsonb_build_object(
+            'id', grades.id,
+            'name', grades.name
+        ) AS grade,
+        jsonb_build_object(
+            'id', locations.id,
+            'city', locations.city,
+            'state', locations.state
+        ) AS location,
+        jsonb_build_object(
+            'id', organizations.id,
+            'name', organizations.name
+        ) AS org,
+        phones.phones,
+        emails.emails
 	FROM
 		contacts
 	INNER JOIN
@@ -116,11 +154,26 @@ CREATE VIEW contact_details AS
 	INNER JOIN
 		locations ON locations.id = contacts.location
 	INNER JOIN
-		organizations ON organizations.id = contacts.org;
+		organizations ON organizations.id = contacts.org
+    LEFT JOIN
+        phones ON phones.contact_id = contacts.id
+    LEFT JOIN
+        emails ON emails.contact_id = contacts.id;
 
 -- +goose StatementBegin
 CREATE OR REPLACE FUNCTION user_contact_details(id uuid)
-    RETURNS TABLE (id UUID, user_id UUID, last_name TEXT, first_name TEXT, title TEXT, metadata TEXT, grade_id UUID, grade TEXT, location_id UUID, city TEXT, state TEXT, org_id UUID, org TEXT, last_contact TIMESTAMPTZ)
+    RETURNS TABLE (
+        id UUID,
+        user_id UUID,
+        last_name TEXT,
+        first_name TEXT,
+        title TEXT,
+        grade JSONB,
+        location JSONB,
+        org JSONB,
+        phones JSONB,
+        emails JSONB,
+        last_contact TIMESTAMPTZ)
     LANGUAGE sql AS
 $func$
 WITH last_contact AS (
@@ -137,30 +190,12 @@ WITH last_contact AS (
         contact_id
 )
 SELECT
-    contacts.id,
-    contacts.user_id,
-    contacts.last_name,
-    contacts.first_name,
-    contacts.title,
-    contacts.metadata,
-    grades.id AS grade_id,
-    grades.name AS grade,
-    locations.id AS location_id,
-    locations.city AS city,
-    locations.state AS state,
-    organizations.id AS org_id,
-    organizations.name AS org,
+    cd.*,
     last_contact.last_contact
 FROM
-    contacts
-INNER JOIN
-    grades ON grades.id = contacts.grade
-INNER JOIN
-    locations ON locations.id = contacts.location
-INNER JOIN
-    organizations ON organizations.id = contacts.org
+    contact_details AS cd
 LEFT JOIN
-    last_contact ON last_contact.contact_id = contacts.id;
+    last_contact ON last_contact.contact_id = cd.id;
 $func$;
 -- +goose StatementEnd
 
