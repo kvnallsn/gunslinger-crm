@@ -5,11 +5,12 @@ import { intlFormat } from "date-fns";
 
 // Local
 import { Contact } from "@/lib/models"
-import { useContacts } from "@/lib/utils/hooks";
+import { useContactEngagements, useContacts } from "@/lib/utils/hooks";
 
 // UI
-import { Avatar, Box, Card, CardContent, CardHeader, Divider, Drawer, Grid, List, ListItem, ListItemAvatar, ListItemText, ListSubheader, Typography } from "@mui/material";
+import { Avatar, Box, Card, CardContent, CardHeader, Divider, Drawer, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, ListSubheader, Typography } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridCallbackDetails, GridColumns, GridRowParams, GridToolbar, MuiEvent } from "@mui/x-data-grid";
+import { FixedSizeList, FixedSizeListProps, ListChildComponentProps } from 'react-window';
 
 // Icons
 import AddCommentIcon from '@mui/icons-material/AddComment';
@@ -23,6 +24,11 @@ import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import InfoIcon from '@mui/icons-material/Info';
+import Groups2Icon from '@mui/icons-material/Groups2';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 
 // Brand Icons
 import FacebookIcon from '@mui/icons-material/Facebook';
@@ -92,28 +98,69 @@ function CardSubHeader(props: ContactCardProps) {
 
 function ContactCard(props: ContactCardProps) {
     const { contact } = props;
+    const { engagements } = useContactEngagements(contact.id);
+    const router = useRouter();
+
+    const engagementIcon = (method: string) => {
+        switch (method) {
+            case 'Phone Call':
+                return <PhoneIcon />;
+            case 'Text / Direct Message':
+                return <ChatOutlinedIcon />;
+            case 'Email':
+                return <EmailIcon />;
+            case 'Meeting (In-Person)':
+            case 'Meeting (Virtual)':
+                return <BusinessCenterIcon />;
+            case 'Conference (In-Person)':
+            case 'Conference (Virtual)':
+                return <Groups2Icon />;
+            default:
+                return <QuestionMarkIcon />;
+        }
+    }
+
+    const renderEngagementRow = (props: ListChildComponentProps) => {
+        const e = engagements[props.index];
+        return (
+            <>
+                <ListItem key={`eng-${e.id}`} disableGutters disablePadding>
+                    <ListItemButton onClick={() => router.push(`/engagements/${e.id}`)}>
+                        <ListItemAvatar>
+                            <Avatar>{engagementIcon(e.method.name)}</Avatar>
+                        </ListItemAvatar>
+                        <ListItemText secondary={formatDate(e.date)}>
+                            {e.title}
+                        </ListItemText>
+                    </ListItemButton>
+                </ListItem>
+                <Divider key={`eng-divider-${props.index}`} />
+            </>
+        );
+    };
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 2, height: '600px', overflowY: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 0, height: '100%', overflowY: 'hidden' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1, p: 1, bgcolor: grey[200], borderBottom: `1px solid ${grey[400]}` }}>
                 <Typography variant='h5'>{`${contact.first_name} ${contact.last_name}`}</Typography>
                 <CardSubHeader contact={contact} />
             </Box>
-            <Grid container spacing={2} sx={{ flexGrow: 1, px: 1, overflowY: { xs: 'scroll', md: 'visible' } }}>
-                <Grid item xs={12} md={4}>
-                    <Typography variant="h6">Contact Information</Typography>
-                    <Divider />
-                    <List dense sx={{ height: '65%', overflowY: { xs: 'visible', md: 'scroll' } }}>
-                        <ListSubheader>Phone Numbers</ListSubheader>
+            <Grid container spacing={0} sx={{ flexGrow: 1, overflowY: { xs: 'scroll', md: 'visible' } }}>
+                <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', borderRight: `1px solid ${grey[300]}` }}>
+                    <Box sx={{ bgcolor: grey[100], borderBottom: `1px solid ${grey[300]}`, p: 1, textAlign: 'center' }}>
+                        <Typography variant="h6">Contact Information</Typography>
+                    </Box>
+                    <List dense sx={{ flexGrow: 1, overflowY: { xs: 'visible', md: 'auto' } }}>
+                        <ListSubheader key='phone-subheader'>Phone Numbers</ListSubheader>
                         {contact.phones && contact.phones.map((c, index) => (
                             <>
-                                <ListItem key={`phone-${c.number}`}>
+                                <ListItem key={`phone-${c.system}-${c.number}`}>
                                     <ListItemAvatar>
                                         <Avatar><PhoneIcon /></Avatar>
                                     </ListItemAvatar>
                                     <ListItemText secondary={c.system}>{c.number}</ListItemText>
                                 </ListItem>
-                                <Divider variant='inset' key={`phone-divider-${index}`} />
+                                <Divider key={`phone-divider-${index}`} />
                             </>
                         ))}
                         {!contact.phones &&
@@ -125,16 +172,16 @@ function ContactCard(props: ContactCardProps) {
                             </ListItem>
                         }
 
-                        <ListSubheader>Email Addresses</ListSubheader>
+                        <ListSubheader key='email-subheader'>Email Addresses</ListSubheader>
                         {contact.emails && contact.emails.map((e, index) => (
                             <>
-                                <ListItem key={`email-${e.address}`}>
+                                <ListItem key={`email-${e.system}-${e.address}`}>
                                     <ListItemAvatar>
                                         <Avatar><EmailIcon /></Avatar>
                                     </ListItemAvatar>
                                     <ListItemText secondary={e.system}>{e.address}</ListItemText>
                                 </ListItem>
-                                <Divider variant='inset' key={`email-divider-${index}`} />
+                                <Divider key={`email-divider-${index}`} />
                             </>
                         ))}
                         {!contact.emails &&
@@ -146,36 +193,47 @@ function ContactCard(props: ContactCardProps) {
                             </ListItem>
                         }
 
-                        <ListSubheader>Social Media</ListSubheader>
+                        <ListSubheader key='sm-subheader'>Social Media</ListSubheader>
                         <ListItem key='facebook'>
                             <ListItemAvatar>
                                 <Avatar><FacebookIcon /></Avatar>
                             </ListItemAvatar>
                             <ListItemText>None</ListItemText>
                         </ListItem>
-                        <Divider variant='inset' />
+                        <Divider key="linkedin-divider" />
                         <ListItem key='linkedin'>
                             <ListItemAvatar>
                                 <Avatar><LinkedInIcon /></Avatar>
                             </ListItemAvatar>
                             <ListItemText>None</ListItemText>
                         </ListItem>
-                        <Divider variant='inset' />
+                        <Divider key="twitter-divider" />
                         <ListItem key='twitter'>
                             <ListItemAvatar>
-                                <Avatar><FacebookIcon /></Avatar>
+                                <Avatar><TwitterIcon /></Avatar>
                             </ListItemAvatar>
                             <ListItemText>None</ListItemText>
                         </ListItem>
                     </List>
                 </Grid>
-                <Grid item xs={12} md={4}>
-                    <Typography variant="h6">Recent Engagements</Typography>
-                    <Divider />
+                <Grid item xs={12} md={4} sx={{ borderRight: `1px solid ${grey[300]}` }}>
+                    <Box sx={{ bgcolor: grey[100], borderBottom: `1px solid ${grey[300]}`, p: 1, textAlign: 'center' }}>
+                        <Typography variant="h6">Engagements</Typography>
+                    </Box>
+                    <FixedSizeList
+                        height={400}
+                        width='100%'
+                        itemSize={40}
+                        itemCount={engagements.length}
+                        overscanCount={5}
+                    >
+                        {renderEngagementRow}
+                    </FixedSizeList>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Typography variant="h6">Notes</Typography>
-                    <Divider />
+                    <Box sx={{ bgcolor: grey[100], borderBottom: `1px solid ${grey[300]}`, p: 1, textAlign: 'center' }}>
+                        <Typography variant="h6">Notes</Typography>
+                    </Box>
                 </Grid>
             </Grid>
         </Box>
@@ -257,8 +315,11 @@ export default function Contacts() {
                 open={contact !== undefined}
                 onClose={toggleDrawer(undefined)}
             >
-                <Box sx={{ height: '100%' }}>
-                    {contact ? <ContactCard contact={contact} /> : <></>}
+                {contact ? <ContactCard contact={contact} /> : <></>}
+                <Box sx={{ position: 'absolute ', top: '0px', right: '0px' }}>
+                    <IconButton sx={{ m: 2 }} onClick={toggleDrawer(undefined)}>
+                        <CloseOutlinedIcon />
+                    </IconButton>
                 </Box>
             </Drawer>
         </Box>

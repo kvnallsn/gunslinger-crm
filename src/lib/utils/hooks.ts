@@ -67,6 +67,16 @@ export function useContacts() {
     };
 }
 
+export function useContactEngagements(contactId: string) {
+    const { data, error, isLoading } = useSWR<Engagement[]>(contactId ? ['/api/contact/engagements', contactId] : [null, null], ([url, id]: string[]) => fetcher2(`${url}?id=${id}`));
+
+    return {
+        engagements: data ?? [],
+        loading: isLoading,
+        error: error
+    };
+}
+
 export function useTopics() {
     const { data, error, isLoading } = useSWR<Topic[]>(`/api/topics`, fetcher2);
 

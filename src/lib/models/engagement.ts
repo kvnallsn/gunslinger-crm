@@ -82,8 +82,8 @@ class Engagement {
         this.modified = new Date();
         this.contacts = e.contacts.map(c => ({
             id: c.id,
-            org_id: c.organization.id,
-            org: c.organization.name,
+            org_id: c.org.id,
+            org: c.org.name,
             grade: c.grade.name,
             lastName: c.last_name,
             firstName: c.first_name,
@@ -91,7 +91,7 @@ class Engagement {
 
         // dedup the orgs
         let orgs = e.contacts
-            .map(c => ({ org_id: c.organization.id, org_name: c.organization.name }));
+            .map(c => ({ org_id: c.org.id, org_name: c.org.name }));
         this.orgs = orgs.filter((o, idx) => orgs.indexOf(o) !== idx);
 
         this.topics = e.topics.map((t: Topic) => ({ id: t.id, topic: t.topic }));
@@ -147,6 +147,22 @@ class Engagement {
                 engagement_id = $1
         `,
             [engagementId]
+        );
+
+        return res.rows;
+    }
+
+    static async fetchByContact(db: SqlClient, contactId: string): Promise<Engagement[]> {
+        const res = await db.query<Engagement>(`
+            SELECT
+                engagement_details.*
+            FROM
+                engagement_details,
+                jsonb_array_elements(contacts::jsonb) AS contact
+            WHERE
+                contact->>'id' = $1
+        `,
+            [contactId]
         );
 
         return res.rows;
