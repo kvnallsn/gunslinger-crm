@@ -57,7 +57,23 @@ CREATE TABLE IF NOT EXISTS contact_emails(
 	PRIMARY KEY (contact_id, system_id, address)
 );
 
+CREATE TABLE IF NOT EXISTS contact_notes(
+	id 			UUID 			PRIMARY KEY NOT NULL,
+	contact_id 	UUID 			NOT NULL REFERENCES contacts(id),
+	created_by	UUID			NOT NULL REFERENCES users(id),
+	created_at 	TIMESTAMPTZ		NOT NULL DEFAULT now(),
+	note 		TEXT 			NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS contact_note_permissions(
+	note_id		UUID 	NOT NULL REFERENCES contact_notes(id),
+	group_id	UUID 	NOT NULL REFERENCES groups(id),
+	PRIMARY KEY (note_id, group_id)
+);
+
 -- +goose Down
+DROP TABLE IF EXISTS contact_note_permissions;
+DROP TABLE IF EXISTS contact_notes;
 DROP TABLE IF EXISTS contact_emails;
 DROP TABLE IF EXISTS contact_phones;
 DROP TABLE IF EXISTS contact_phone_types;

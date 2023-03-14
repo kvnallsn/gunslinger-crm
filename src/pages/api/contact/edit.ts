@@ -45,8 +45,6 @@ async function handleForm(db: SqlClient, form: ContactForm): Promise<Contact> {
         title: form.title,
         phones: form.phones,
         emails: form.emails,
-        socials: [],
-        tags: [],
     });
 
     await contact.save(db);

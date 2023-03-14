@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import Link from 'next/link';
-import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer, ButtonGroup } from "@mui/material";
+import { Box, Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, IconButton, Drawer, ButtonGroup, ListItemAvatar, Avatar } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
 import DropdownMenu from "./dropdown-menu";
-import DarkModeToggle from "./darkmode-toggle";
+import DarkModeToggle, { DarkModeToggleButtons } from "./darkmode-toggle";
 
 const drawerWidth = 240;
 
@@ -27,7 +27,7 @@ const adminRoutes = [
 export default function Navbar() {
     const router = useRouter();
     const { data: session, status } = useSession();
-    const [mobileOpen, setMobileOpen] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState<boolean>(false);
 
     const handleDrawerToggle = () => {
         setMobileOpen(open => !open);
@@ -35,22 +35,64 @@ export default function Navbar() {
 
     const isAuthenticated = status === 'authenticated';
     const isAdmin = session ? session.user.admin : false;
+    const username = session ? session.user.username : '';
 
     const drawer = (
-        <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
-            <Typography variant='h6' sx={{ my: 2 }}>
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Typography variant='h6' sx={{ my: 2, textAlign: 'center' }}>
                 GunslignerCRM
             </Typography>
             <Divider />
-            <List>
-                {routes.map(item => (
-                    <ListItem key={`drawer-${item.display}`} disablePadding>
-                        <ListItemButton sx={{ textAlign: 'center' }} href={item.route}>
-                            <ListItemText primary={item.display} />
-                        </ListItemButton>
-                    </ListItem>
+            <List disablePadding sx={{ flexGrow: 1 }}>
+                <ListItem disablePadding>
+                    <DarkModeToggleButtons />
+                </ListItem>
+                <Divider />
+                {isAuthenticated &&
+                    <React.Fragment>
+                        <ListItem>
+                            <ListItemAvatar>
+                                <Avatar>{username[0]}</Avatar>
+                            </ListItemAvatar>
+                            <ListItemText>{username}</ListItemText>
+                        </ListItem>
+                        <Divider />
+                    </React.Fragment>
+                }
+                {isAuthenticated && routes.map(item => (
+                    <React.Fragment key={`drawer-${item.display}`}>
+                        <ListItem disablePadding>
+                            <Link passHref legacyBehavior key={item.display} href={item.route}>
+                                <ListItemButton sx={{ textAlign: 'left' }} onClick={handleDrawerToggle}>
+                                    <ListItemText primary={item.display} />
+                                </ListItemButton>
+                            </Link>
+                        </ListItem>
+                        <Divider />
+                    </React.Fragment>
                 ))}
             </List>
+            {isAuthenticated ?
+                <Button
+                    fullWidth
+                    variant="contained"
+                    sx={{ borderRadius: 0 }}
+                    color="error"
+                    onClick={() => logout()}
+                >
+                    Logout
+                </Button>
+                :
+                <Button
+                    fullWidth
+                    variant="contained"
+                    sx={{ borderRadius: 0 }}
+                    color="primary"
+                    onClick={() => router.push('/auth/signin')}
+                >
+                    Login
+                </Button>
+            }
         </Box>
     );
 

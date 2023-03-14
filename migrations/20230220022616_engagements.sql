@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS topics(
     id          UUID            PRIMARY KEY NOT NULL,
     created_by  UUID            NOT NULL REFERENCES users(id),
-    created     TIMESTAMPTZ     NOT NULL DEFAULT 'now()',
+    created     TIMESTAMPTZ     NOT NULL DEFAULT now(),
     topic       TEXT            NOT NULL
 );
 
@@ -15,11 +15,11 @@ CREATE TABLE IF NOT EXISTS engagements(
     id          UUID            PRIMARY KEY NOT NULL,
     method      UUID            NOT NULL REFERENCES engagement_methods(id),
     title       TEXT            NOT NULL,
-    date        TIMESTAMPTZ     NOT NULL DEFAULT 'now()',
+    date        TIMESTAMPTZ     NOT NULL DEFAULT now(),
     summary     TEXT            NOT NULL,
 	created_by  UUID 	        NOT NULL REFERENCES users(id),
-    created     TIMESTAMPTZ     NOT NULL DEFAULT 'now()',
-    modified    TIMESTAMPTZ     NOT NULL DEFAULT 'now()'
+    created     TIMESTAMPTZ     NOT NULL DEFAULT now(),
+    modified    TIMESTAMPTZ     NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS engagement_topics(

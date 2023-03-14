@@ -176,7 +176,7 @@ export default function EditEngagement({ methods, groups, createdBy, createdById
                                 multiple
                                 options={contacts.filter((c: Contact) => c.user_id === undefined || c.user_id !== createdById)}
                                 isOptionEqualToValue={(o: Contact, v: Contact) => o.id === v.id}
-                                getOptionLabel={(c: Contact) => `${c.first_name} ${c.last_name} (${c.organization.name})`}
+                                getOptionLabel={(c: Contact) => `${c.first_name} ${c.last_name} (${c.org.name})`}
                                 onChange={values => setValue('contacts', values.map((v: Contact) => v.id))}
                                 error={errors['contacts']}
                             />

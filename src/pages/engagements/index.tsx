@@ -1,15 +1,58 @@
 import { Engagement } from "@/lib/models";
 import { useEngagements } from "@/lib/utils/hooks";
-import { Box, Chip, TextField } from "@mui/material";
-import { DataGrid, GridActionsCellItem, GridCellParams, GridColumns, GridFilterInputValue, GridFilterItem, GridFilterOperator, GridToolbar } from "@mui/x-data-grid";
-import LaunchIcon from '@mui/icons-material/Launch';
+import { Avatar, Box, Button, Card, CardActionArea, CardHeader, Chip, Divider, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { DataGrid, GridActionsCellItem, GridCallbackDetails, GridCellParams, GridColumns, GridFilterInputValue, GridFilterItem, GridRowParams, MuiEvent } from "@mui/x-data-grid";
+import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import LaunchIcon from '@mui/icons-material/Launch';
 import { useRouter } from "next/router";
 import { EngagementOrg, EngagementTopic } from "@/lib/models/engagement";
+import { formatDistanceToNow } from 'date-fns';
+import EngagementIcon from '@/lib/components/icon-engagement';
+import { Virtuoso } from 'react-virtuoso';
+import GridToolbar from '@/lib/components/grid-toolbar';
+
+interface MobileCardProps {
+    engagement: Engagement;
+    onClick: (id: string) => void;
+}
+
+function MobileCard(props: MobileCardProps) {
+    const { engagement, onClick } = props;
+
+    const relativeDate = formatDistanceToNow(new Date(engagement.date), { addSuffix: true });
+
+    const Title = (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography sx={{ fontSize: '0.875rem' }}>{`${engagement.title}`}</Typography>
+            <Typography sx={{ fontSize: '0.875rem', fontStyle: 'italic', color: 'text.secondary' }}>{engagement.username}</Typography>
+        </Box>
+    );
+
+    const Subheader = (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>{`${engagement.method.name}`}</Typography>
+            <Typography sx={{ fontSize: '0.875rem', fontStyle: 'italic', color: 'text.secondary' }}>{relativeDate}</Typography>
+        </Box>
+    );
+
+    return (
+        <Card sx={{ my: 1 }} variant='outlined'>
+            <CardActionArea onClick={() => onClick(engagement.id)}>
+                <CardHeader
+                    avatar={<Avatar aria-label="contact"><EngagementIcon engagement={engagement} /></Avatar>}
+                    title={Title}
+                    subheader={Subheader}
+                />
+            </CardActionArea>
+        </Card>
+    );
+}
 
 export default function Engagements() {
     const router = useRouter();
+    const theme = useTheme();
     const { engagements, loading } = useEngagements();
 
     const openEngagement = async (id: string) => {
@@ -53,6 +96,10 @@ export default function Engagements() {
         }
     }
 
+    const handleClick = (params: GridRowParams, event: MuiEvent<React.MouseEvent>, details: GridCallbackDetails) => {
+        openEngagement(params.row.id);
+    }
+
     const columns: GridColumns<Engagement> = [
         { field: 'date', headerName: 'Date/Time', type: 'dateTime', flex: 2, valueGetter: v => v && new Date(v.row.date) },
         { field: 'username', headerName: 'Created By', flex: 1 },
@@ -88,36 +135,53 @@ export default function Engagements() {
             sortable: false
         },
         { field: 'method', headerName: 'Method', flex: 1, valueGetter: (params: GridCellParams) => params.row.method.name },
-        {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Actions',
-            flex: 1,
-            getActions: params => [
-                <GridActionsCellItem icon={<LaunchIcon />} label="Open Notes" onClick={() => openEngagement(params.row.id)} />,
-            ]
-        }
     ];
+
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     return (
         <Box sx={{ height: '100%' }}>
-            <DataGrid
-                rows={engagements || []}
-                columns={columns}
-                loading={loading}
-                components={{ Toolbar: GridToolbar }}
-                componentsProps={{
-                    toolbar: {
-                        showQuickFilter: true,
-                        quickFilterProps: { debounceMs: 500 },
-                    }
-                }}
-                initialState={{
-                    sorting: {
-                        sortModel: [{ field: 'date', sort: 'desc' }]
-                    }
-                }}
-            />
+            {isSmallScreen ?
+                <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', mx: 1, pt: 1, rowGap: 1 }}>
+                    <Button variant="outlined" fullWidth startIcon={<AddIcon />} onClick={() => router.push('/engagements/edit')}>Create Engagement</Button>
+                    <Divider />
+                    <Box sx={{ flexGrow: 1 }}>
+                        <Virtuoso
+                            totalCount={engagements.length}
+                            itemContent={index => (
+                                <MobileCard
+                                    key={`engagement-${engagements[index].id}`}
+                                    engagement={engagements[index]}
+                                    onClick={openEngagement}
+                                />
+                            )}
+                        />
+                    </Box>
+                </Box>
+                :
+                <DataGrid
+                    rows={engagements}
+                    columns={columns}
+                    loading={loading}
+                    sx={{
+                        border: 0,
+                    }}
+                    components={{
+                        Toolbar: GridToolbar
+                    }}
+                    componentsProps={{
+                        toolbar: {
+                            onCreate: () => router.push(`/engagements/edit`),
+                        }
+                    }}
+                    initialState={{
+                        sorting: {
+                            sortModel: [{ field: 'date', sort: 'desc' }]
+                        }
+                    }}
+                    onRowDoubleClick={handleClick}
+                />
+            }
         </Box>
     );
 }

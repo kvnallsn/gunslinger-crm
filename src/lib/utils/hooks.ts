@@ -1,5 +1,6 @@
 import useSWR from 'swr';
 import { Contact, Engagement } from '../models';
+import { ContactNote } from '../models/contact';
 import { EngagementNote } from '../models/engagement';
 import Group from '../models/groups';
 import { Topic } from '../models/topic';
@@ -39,7 +40,7 @@ export function useUsers() {
     const { data, error, isLoading, mutate } = useSWR<User[]>(`/api/users`, fetcher2);
 
     return {
-        users: data || [],
+        users: data ?? [],
         loading: isLoading,
         error: error,
         mutate
@@ -50,7 +51,7 @@ export function useGroups() {
     const { data, error, isLoading, mutate } = useSWR<Group[]>(`/api/groups`, fetcher2);
 
     return {
-        groups: data || [],
+        groups: data ?? [],
         loading: isLoading,
         error: error,
         mutate
@@ -77,11 +78,22 @@ export function useContactEngagements(contactId: string) {
     };
 }
 
+export function useContactNotes(contactId: string) {
+    const { data, error, isLoading, mutate } = useSWR<ContactNote[]>(contactId ? ['/api/contact/notes', contactId] : [null, null], ([url, id]: string[]) => fetcher2(`${url}?id=${id}`));
+
+    return {
+        notes: data ?? [],
+        loading: isLoading,
+        error: error,
+        mutate
+    };
+}
+
 export function useTopics() {
     const { data, error, isLoading } = useSWR<Topic[]>(`/api/topics`, fetcher2);
 
     return {
-        topics: data,
+        topics: data ?? [],
         loading: isLoading,
         error: error
     };
@@ -91,7 +103,7 @@ export function useEngagements() {
     const { data, error, isLoading } = useSWR<Engagement[]>(`/api/engagements`, fetcher2);
 
     return {
-        engagements: data,
+        engagements: data ?? [],
         loading: isLoading,
         error: error
     };
@@ -111,7 +123,7 @@ export function useEngagementNotes(id: string) {
     const { data, error, isLoading } = useSWR<EngagementNote[]>(id ? ['/api/engagement/notes', id] : [null, null], ([url, id]: string[]) => fetcher2(`${url}?id=${id}`));
 
     return {
-        notes: data,
+        notes: data ?? [],
         loading: isLoading,
         error: error
     };
@@ -121,7 +133,7 @@ export function useEngagementTopics(id: string) {
     const { data, error, isLoading } = useSWR<Topic[]>(id ? ['/api/engagement/topics', id] : [null, null], ([url, id]: string[]) => fetcher2(`${url}?id=${id}`));
 
     return {
-        topics: data,
+        topics: data ?? [],
         loading: isLoading,
         error: error
     };

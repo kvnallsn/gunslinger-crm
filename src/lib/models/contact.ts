@@ -5,9 +5,13 @@ import { InferType, object, string } from 'yup';
 import { ContactForm } from '../forms';
 
 const ContactPhoneSchema = object().shape({
+	id: string()
+		.required()
+		.uuid(),
+
 	system: string()
 		.required()
-		.min(2, 'Phone System must be at least two characters'),
+		.min(2),
 
 	number: string()
 		.required()
@@ -17,9 +21,13 @@ const ContactPhoneSchema = object().shape({
 interface IContactPhone extends InferType<typeof ContactPhoneSchema> { }
 
 const ContactEmailSchema = object().shape({
+	id: string()
+		.required()
+		.uuid(),
+
 	system: string()
 		.required()
-		.min(2, 'Email System must be at least two characters'),
+		.min(2),
 
 	address: string()
 		.required()
@@ -45,6 +53,21 @@ interface IContact {
 	last_contact?: Date;
 	phones?: IContactPhone[];
 	emails?: IContactEmail[];
+}
+
+export interface ContactNote {
+	id: string;
+	contact_id: string;
+	creator: {
+		id: string;
+		username: string;
+	};
+	note: string;
+	created_at: Date;
+	groups: {
+		id: string;
+		name: string;
+	}
 }
 
 class Contact {
@@ -108,7 +131,7 @@ class Contact {
 	}
 
 	static async fetchAll(client: SqlClient, userId: string): Promise<Contact[]> {
-		const contacts = await client.query<Contact>('SELECT * FROM user_contact_details($1)', [userId]);
+		const contacts = await client.query<Contact>('SELECT * FROM user_contact_details($1) ORDER BY last_name ASC', [userId]);
 		return contacts.rows.map(c => new Contact(c));
 	}
 
@@ -119,6 +142,62 @@ class Contact {
 		} else {
 			return new Contact(contact.rows[0]);
 		}
+	}
+
+	static async fetchNote(client: SqlClient, userId: string, noteId: string): Promise<ContactNote[]> {
+		const notes = await client.query<ContactNote>(`
+			SELECT DISTINCT ON (id)
+				contact_note_details.*
+			FROM
+				contact_note_details
+			WHERE
+				id = $1
+				AND
+				user_id = $2
+		`,
+			[noteId, userId]
+		);
+
+		return notes.rows;
+	}
+
+	static async fetchNotes(client: SqlClient, userId: string, contactId: string): Promise<ContactNote[]> {
+		const notes = await client.query<ContactNote>(`
+			SELECT DISTINCT ON (id)
+				contact_note_details.*
+			FROM
+				contact_note_details
+			WHERE
+				contact_id = $1
+				AND
+				user_id = $2
+		`,
+			[contactId, userId]
+		);
+
+		return notes.rows;
+	}
+
+	static async createNote(client: SqlClient, userId: string, contactId: string, note: string, groups: string[], noteId?: string): Promise<ContactNote[]> {
+		const id = noteId ?? uuidv4();
+
+		await client.query(`
+			INSERT INTO contact_notes	
+				(id, contact_id, created_by, note)	
+			VALUES
+				($1, $2, $3, $4)
+		`, [id, contactId, userId, note]);
+
+		for (const group of groups) {
+			await client.query(`
+				INSERT INTO contact_note_permissions
+					(note_id, group_id)
+				VALUES
+					($1, $2)	
+			`, [id, group]);
+		}
+
+		return this.fetchNote(client, userId, id)
 	}
 
 	toJSON() {
@@ -157,7 +236,7 @@ class Contact {
 			INSERT INTO
 				contacts (id, last_name, first_name, grade, location, org, title)
 			VALUES
-				($1, $2, $3, $4, $5, $6, $7, $8)
+				($1, $2, $3, $4, $5, $6, $7)
 			ON CONFLICT(id) DO UPDATE
 			SET
 				last_name = EXCLUDED.last_name,
@@ -175,7 +254,31 @@ class Contact {
 				this.org.id,
 				this.title,
 			]
-		)
+		);
+
+		// add phones
+		for (const phone of this.phones) {
+			await client.query(`
+				INSERT INTO
+					contact_phones (contact_id, system_id, number)
+				VALUES
+					($1, $2, $3)
+			`,
+				[this.id, phone.id, phone.number]
+			);
+		}
+
+		// add emails
+		for (const email of this.emails) {
+			await client.query(`
+				INSERT INTO
+					contact_emails (contact_id, system_id, address)
+				VALUES
+					($1, $2, $3)
+			`,
+				[this.id, email.id, email.address]
+			);
+		}
 	}
 };
 

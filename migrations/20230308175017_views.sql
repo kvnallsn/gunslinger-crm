@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE VIEW user_groups AS
+CREATE OR REPLACE VIEW user_groups AS
     SELECT
         user_id,
         array_agg(group_id) AS memberof
@@ -11,7 +11,7 @@ CREATE VIEW user_groups AS
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE VIEW user_detail AS
+CREATE OR REPLACE VIEW user_detail AS
 	WITH user_groups AS (
 		SELECT
 			group_members.user_id,
@@ -45,7 +45,7 @@ CREATE VIEW user_detail AS
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE VIEW group_detail AS
+CREATE OR REPLACE VIEW group_detail AS
 	SELECT
 		groups.id,
 		groups.name,
@@ -79,7 +79,7 @@ CREATE VIEW last_contacted AS
         engagement_contacts
         ON engagement_contacts.engagement_id = engagements.id;
 
-CREATE VIEW user_engagements AS
+CREATE OR REPLACE VIEW user_engagements AS
     SELECT
         engagements.id AS engagement_id,
         contacts.user_id
@@ -94,7 +94,7 @@ CREATE VIEW user_engagements AS
     WHERE
         contacts.user_id IS NOT NULL;
 
-CREATE VIEW contact_details AS
+CREATE OR REPLACE VIEW contact_details AS
     WITH phones AS (
         SELECT
             contact_id,
@@ -201,7 +201,7 @@ $func$;
 
 
 -- +goose StatementBegin
-CREATE VIEW engagement_orgs AS
+CREATE OR REPLACE VIEW engagement_orgs AS
     SELECT
         engagement_id,
         json_agg(DISTINCT jsonb_build_object(
@@ -219,7 +219,7 @@ CREATE VIEW engagement_orgs AS
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE VIEW engagement_contact_details AS
+CREATE OR REPLACE VIEW engagement_contact_details AS
     SELECT
         engagement_id,
         json_agg(json_build_object(
@@ -278,7 +278,7 @@ CREATE VIEW engagement_note_details AS
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE VIEW engagement_details AS
+CREATE OR REPLACE VIEW engagement_details AS
     WITH eg_topics AS (
         SELECT 
             engagement_topics.engagement_id,
@@ -328,8 +328,54 @@ CREATE VIEW engagement_details AS
         ON eg_topics.engagement_id = engagements.id;
 -- +goose StatementEnd
 
+-- +goose StatementBegin
+CREATE OR REPLACE VIEW contact_note_details AS
+    WITH perms AS (
+        SELECT
+            note_id, 
+            jsonb_agg(jsonb_build_object(
+                'id', group_id,
+                'name', g.name
+            )) AS groups
+        FROM
+            contact_note_permissions
+        INNER JOIN
+            groups AS g
+            ON g.id = group_id
+        GROUP BY
+            note_id
+    )
+    SELECT
+        contact_notes.id,
+        contact_notes.contact_id,
+        jsonb_build_object(
+            'id', contact_notes.created_by,
+            'username', users.username
+        ) AS creator,
+        contact_notes.note,
+        contact_notes.created_at,
+        perms.groups,
+        group_members.user_id
+    FROM
+        contact_notes
+    LEFT JOIN
+        perms
+        ON perms.note_id = contact_notes.id
+    INNER JOIN
+        users
+        ON users.id = contact_notes.created_by
+    INNER JOIN
+        contact_note_permissions
+        ON contact_note_permissions.note_id = contact_notes.id
+    INNER JOIN
+        group_members
+        ON group_members.group_id = contact_note_permissions.group_id;
+-- +goose StatementEnd
+
+
 -- +goose Down
 DROP FUNCTION user_contact_details;
+DROP VIEW IF EXISTS contact_note_details;
 DROP VIEW IF EXISTS engagement_note_details;
 DROP VIEW IF EXISTS engagement_details;
 DROP VIEW IF EXISTS engagement_contact_details;

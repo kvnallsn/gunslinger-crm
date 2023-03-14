@@ -136,8 +136,8 @@ export default function EditContact({ grades, orgs, locations, systems, networks
         setPhoneMenuAnchor(event.currentTarget);
     };
 
-    const closePhoneMenu = (system: string) => {
-        phones.append({ system: system, number: "" });
+    const closePhoneMenu = (id: string, system: string) => {
+        phones.append({ id: id, system: system, number: "" });
         setPhoneMenuAnchor(null);
     };
 
@@ -145,8 +145,8 @@ export default function EditContact({ grades, orgs, locations, systems, networks
         setEmailMenuAnchor(event.currentTarget);
     };
 
-    const closeEmailMenu = (system: string) => {
-        emails.append({ system: system, address: "" });
+    const closeEmailMenu = (id: string, system: string) => {
+        emails.append({ id: id, system: system, address: "" });
         setEmailMenuAnchor(null);
     };
 
@@ -200,10 +200,10 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <FormTextField control={control} field='location.city' label="City" disabled={location.id !== BLANK_UUID} />
+                            <FormTextField control={control} field='location.city' label="City" disabled={location && location.id !== BLANK_UUID} />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <FormTextField control={control} field='location.state' label="State" disabled={location.id !== BLANK_UUID} />
+                            <FormTextField control={control} field='location.state' label="State" disabled={location && location.id !== BLANK_UUID} />
                         </Grid>
 
                         <Grid item xs={12} sm={4}>
@@ -234,7 +234,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                                     Add
                                 </Button>
                                 <Menu id="phone-menu" anchorEl={phoneMenuAnchor} open={phoneMenuOpen}>
-                                    {systems.map(s => <MenuItem key={s.name} onClick={() => closePhoneMenu(s.name)}>{s.name}</MenuItem>)}
+                                    {systems.map(s => <MenuItem key={s.name} onClick={() => closePhoneMenu(s.id, s.name)}>{s.name}</MenuItem>)}
                                 </Menu>
                             </Box>
                         </Grid>
@@ -273,7 +273,7 @@ export default function EditContact({ grades, orgs, locations, systems, networks
                                     Add
                                 </Button>
                                 <Menu id="email-menu" anchorEl={emailMenuAnchor} open={emailMenuOpen}>
-                                    {networks.map(s => <MenuItem key={s.name} onClick={() => closeEmailMenu(s.name)}>{s.name}</MenuItem>)}
+                                    {networks.map(s => <MenuItem key={s.name} onClick={() => closeEmailMenu(s.id, s.name)}>{s.name}</MenuItem>)}
                                 </Menu>
                             </Box>
                         </Grid>

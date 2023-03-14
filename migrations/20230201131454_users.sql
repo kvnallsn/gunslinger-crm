@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
 	id			UUID			PRIMARY KEY NOT NULL,
 	email 		TEXT			NOT NULL UNIQUE,
 	username	TEXT			NOT NULL UNIQUE,
-	created 	TIMESTAMPTZ 	NOT NULL DEFAULT 'now()',
-	modified	TIMESTAMPTZ		NOT NULL DEFAULT 'now()',
+	created 	TIMESTAMPTZ 	NOT NULL DEFAULT now(),
+	modified	TIMESTAMPTZ		NOT NULL DEFAULT now(),
 	active 		BOOLEAN			NOT NULL DEFAULT false,
 	admin		BOOLEAN			NOT NULL DEFAULT false
 );
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS auth_password (
 	user_id  	UUID 			NOT NULL UNIQUE REFERENCES users(id),
 	password 	TEXT 			NOT NULL,
-	changed		TIMESTAMPTZ		NOT NULL DEFAULT 'now()'
+	changed		TIMESTAMPTZ		NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS groups (

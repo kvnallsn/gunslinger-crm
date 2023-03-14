@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Contact, User } from '@/lib/models';
+import { User } from '@/lib/models';
 import { getDatabaseConn } from '@/lib/db'
 import { PoolClient } from 'pg';
 import { AppError, AppResponse, err, NewAppResponse } from '@/lib/utils/api';

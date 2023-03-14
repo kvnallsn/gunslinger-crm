@@ -107,14 +107,12 @@ export default function EngagementDetail() {
         if (d === undefined) {
             return 'No Date Specified';
         } else {
-            return d.toLocaleString('en-US', {
-                weekday: 'long',
+            return new Date(d).toLocaleString('en-US', {
                 year: 'numeric',
-                month: 'long',
+                month: 'short',
                 day: 'numeric',
                 hour: 'numeric',
-                minute: 'numeric',
-                second: 'numeric'
+                minute: 'numeric'
             });
         }
     }
@@ -200,13 +198,13 @@ export default function EngagementDetail() {
 
                     <Section title="Notes">
                         <Grid container rowSpacing={2} sx={{ p: 1 }}>
-                            {!notes || notes.length == 0 ?
+                            {notes.length == 0 ?
                                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'center', alignItems: 'center', p: 8 }}>
                                     <InfoIcon color='inherit' fontSize='large' sx={{ mb: 1 }} />
                                     <Typography component='i' sx={{ color: 'text.secondary' }}>No Notes Found</Typography>
                                 </Box>
                                 :
-                                notes?.map(note => <Grid key={`eg - n - ${note.id} `} item xs={12}><EngagementNote note={note} /></Grid>)
+                                notes.map(note => <Grid key={`eg - n - ${note.id} `} item xs={12}><EngagementNote note={note} /></Grid>)
                             }
                         </Grid>
                     </Section>

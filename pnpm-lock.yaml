@@ -19,6 +19,7 @@ specifiers:
   '@types/pg': ^8.6.6
   '@types/react': 18.0.28
   '@types/react-dom': 18.0.10
+  '@types/react-virtualized-auto-sizer': ^1.0.1
   '@types/react-window': ^1.8.5
   '@types/uuid': ^9.0.1
   date-fns: ^2.29.3
@@ -31,6 +32,8 @@ specifiers:
   react: 18.2.0
   react-dom: 18.2.0
   react-hook-form: ^7.43.5
+  react-virtualized-auto-sizer: ^1.0.7
+  react-virtuoso: ^4.1.0
   react-window: ^1.8.8
   redis: ^4.6.5
   swr: ^2.1.0
@@ -61,6 +64,8 @@ dependencies:
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-hook-form: 7.43.5_react@18.2.0
+  react-virtualized-auto-sizer: 1.0.7_biqbaboplfbrettd7655fr4n2y
+  react-virtuoso: 4.1.0_biqbaboplfbrettd7655fr4n2y
   react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
   redis: 4.6.5
   swr: 2.1.0_react@18.2.0
@@ -75,6 +80,7 @@ devDependencies:
   '@types/pg': 8.6.6
   '@types/react': 18.0.28
   '@types/react-dom': 18.0.10
+  '@types/react-virtualized-auto-sizer': 1.0.1
   '@types/react-window': 1.8.5
   '@types/uuid': 9.0.1
 
@@ -1227,6 +1233,12 @@ packages:
     dependencies:
       '@types/react': 18.0.28
     dev: false
+
+  /@types/react-virtualized-auto-sizer/1.0.1:
+    resolution: {integrity: sha512-GH8sAnBEM5GV9LTeiz56r4ZhMOUSrP43tAQNSRVxNexDjcNKLCEtnxusAItg1owFUFE6k0NslV26gqVClVvong==}
+    dependencies:
+      '@types/react': 18.0.28
+    dev: true
 
   /@types/react-window/1.8.5:
     resolution: {integrity: sha512-V9q3CvhC9Jk9bWBOysPGaWy/Z0lxYcTXLtLipkt2cnRj1JOSFNF7wqGpkScSXMgBwC+fnVRg/7shwgddBG5ICw==}
@@ -3170,6 +3182,28 @@ packages:
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    dev: false
+
+  /react-virtualized-auto-sizer/1.0.7_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-Mxi6lwOmjwIjC1X4gABXMJcKHsOo0xWl3E3ugOgufB8GJU+MqrtY35aBuvCYv/razQ1Vbp7h1gWJjGjoNN5pmA==}
+    engines: {node: '>8.0.0'}
+    peerDependencies:
+      react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0-rc
+      react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0-rc
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    dev: false
+
+  /react-virtuoso/4.1.0_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-Vcq5WXn18PvPT55kdeGQ8BN3K95XyPe7hum8zG6Tx7g1CtUYVsQKN7fouMxBSy+XymEDB5ynGy8JWhuqyLLtPw==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16 || >=17 || >= 18'
+      react-dom: '>=16 || >=17 || >= 18'
+    dependencies:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: false
