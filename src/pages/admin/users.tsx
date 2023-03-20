@@ -1,9 +1,8 @@
 import { User } from "@/lib/models";
 import { useUsers } from "@/lib/utils/hooks";
-import { Box, Button, Checkbox, Dialog, DialogContent, DialogTitle, FormControlLabel, Grid, List, ListItem, ListItemButton, ListItemText, TextField } from "@mui/material";
-import { DataGrid, GridColumns, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarFilterButton, GridToolbarQuickFilter } from "@mui/x-data-grid";
+import { Box, Button, Checkbox, Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
+import { DataGrid, GridColumns } from "@mui/x-data-grid";
 import { useSession } from "next-auth/react";
-import AddIcon from '@mui/icons-material/Add';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useState } from "react";
@@ -13,29 +12,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import FormTextField from "@/lib/components/form-textfield";
 import FormPassword from "@/lib/components/form-password";
 import FormCheckbox from "@/lib/components/form-checkbox";
-
-type ToolbarProps = {
-    onClick: () => void;
-}
+import GridToolbar from '@/lib/components/grid-toolbar';
 
 type DialogProps = {
     open: boolean;
     onClose: () => void;
     onCreate: (user: User) => void;
-}
-
-function DataToolbar({ onClick }: ToolbarProps) {
-    return (
-        <GridToolbarContainer>
-            <GridToolbarFilterButton />
-            <GridToolbarDensitySelector />
-            <Button startIcon={<AddIcon />} size='small' onClick={onClick}>
-                Create
-            </Button>
-            <Box sx={{ flexGrow: 1 }} />
-            <GridToolbarQuickFilter />
-        </GridToolbarContainer>
-    );
 }
 
 function CreateUserDialog({ open, onClose, onCreate }: DialogProps) {
@@ -103,7 +85,6 @@ export default function AdminDashboard() {
 
     const { users, loading, mutate } = useUsers();
     const columns: GridColumns<User> = [
-        { field: 'id', headerName: 'Id', flex: 2 },
         { field: 'email', headerName: 'Email', flex: 2 },
         { field: 'username', headerName: 'Username', flex: 2 },
         { field: 'created', headerName: 'Created', type: 'dateTime', flex: 2, valueGetter: r => new Date(r.row.created) },
@@ -124,15 +105,14 @@ export default function AdminDashboard() {
         <Box sx={{ height: '100%' }}>
             <CreateUserDialog open={open} onClose={handleCreateClose} onCreate={handleCreateUser} />
             <DataGrid
-                sx={{ pt: 1 }}
                 rows={users || []}
                 columns={columns}
                 loading={loading}
                 components={{
-                    Toolbar: DataToolbar,
+                    Toolbar: GridToolbar
                 }}
                 componentsProps={{
-                    toolbar: { onClick: handleCreateClick },
+                    toolbar: { onCreate: handleCreateClick },
                 }}
             />
         </Box>

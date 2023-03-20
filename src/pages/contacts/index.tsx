@@ -166,7 +166,7 @@ export default function Contacts() {
                 open={contact !== undefined}
                 onClose={toggleDrawer(undefined)}
             >
-                {contact ? <ContactCard contact={contact} /> : <></>}
+                {contact && <ContactCard contact={contact} />}
                 <Box sx={{ position: 'absolute ', top: '0px', right: '0px' }}>
                     <IconButton sx={{ m: 2 }} onClick={toggleDrawer(undefined)}>
                         <CloseOutlinedIcon />

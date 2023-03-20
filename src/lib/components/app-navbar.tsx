@@ -5,12 +5,17 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 // UI imports
-import { AppBar, Avatar, Box, Button, Divider, Drawer, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { AppBar, Avatar, Box, Button, Collapse, Divider, Drawer, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { DarkModeToggleButtons } from './darkmode-toggle';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ContactsIcon from '@mui/icons-material/Contacts';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import MenuIcon from '@mui/icons-material/Menu';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { blue, grey } from '@mui/material/colors';
 
 const drawerWidth = 240;
@@ -21,14 +26,9 @@ const routes = [
     { display: 'Engagements', route: '/engagements', icon: <Diversity3Icon /> },
 ];
 
-const createRoutes = [
-    { display: 'Contact', href: '/contacts/edit' },
-    { display: 'Engagement', href: '/engagements/edit' },
-];
-
 const adminRoutes = [
-    { display: 'Manage Users', href: '/admin/users' },
-    { display: 'Manage Groups', href: '/admin/groups' }
+    { display: 'Manage Users', route: '/admin/users', icon: <PersonIcon /> },
+    { display: 'Manage Groups', route: '/admin/groups', icon: <GroupIcon /> }
 ];
 
 export default function AppNavBar() {
@@ -36,6 +36,7 @@ export default function AppNavBar() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+    const [adminOpen, setAdminOpen] = useState<boolean>(false);
 
     const isAuthenticated = status === 'authenticated';
     const isAdmin = session ? session.user.admin : false;
@@ -109,6 +110,40 @@ export default function AppNavBar() {
                         <Divider />
                     </React.Fragment>
                 ))}
+                {isAdmin &&
+                    <React.Fragment>
+                        <ListItem disablePadding>
+                            <ListItemButton onClick={() => setAdminOpen(!adminOpen)}>
+                                <ListItemIcon><AdminPanelSettingsIcon /></ListItemIcon>
+                                <ListItemText>Admin</ListItemText>
+                                {adminOpen ? <ExpandLess /> : <ExpandMore />}
+                            </ListItemButton>
+                        </ListItem>
+                        <Collapse in={adminOpen} timeout='auto' unmountOnExit>
+                            <List disablePadding>
+                                {adminRoutes.map(item => (
+                                    <React.Fragment key={`drawer-${item.display}`}>
+                                        <ListItem disablePadding>
+                                            <Link passHref legacyBehavior key={item.display} href={item.route}>
+                                                <ListItemButton
+                                                    sx={{ textAlign: 'left', pl: 4 }}
+                                                    onClick={handleDrawerToggle}
+                                                    selected={router.pathname === item.route}
+                                                >
+                                                    <ListItemIcon>
+                                                        {item.icon}
+                                                    </ListItemIcon>
+                                                    <ListItemText primary={item.display} />
+                                                </ListItemButton>
+                                            </Link>
+                                        </ListItem>
+                                        <Divider />
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        </Collapse>
+                    </React.Fragment>
+                }
             </List>
             {isAuthenticated ?
                 <Button

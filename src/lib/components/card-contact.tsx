@@ -45,6 +45,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import FormTextField from './form-textfield';
 import Group from '../models/groups';
+import FlexColumnBox from './box-flexcolumn';
+import color from '../utils/color';
 
 interface ContactCardProps {
     contact: Contact;
@@ -73,15 +75,6 @@ function formatDate(date?: any): string {
         locale: 'en-US'
     })
 }
-
-const FlexColumnBox = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'column'
-}));
-
-const FlexBox = styled(Box)(({ theme }) => ({
-    display: 'flex'
-}));
 
 const NoteAccordion = styled((props: any) => (
     <Accordion disableGutters elevation={0} square {...props} />
@@ -402,8 +395,6 @@ function ContactNotes(props: ContactNotesProps) {
     )
 }
 
-type ColorIndex = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
-
 export default function ContactCard(props: ContactCardProps) {
     const { contact } = props;
     const router = useRouter();
@@ -413,8 +404,6 @@ export default function ContactCard(props: ContactCardProps) {
 
     const { engagements } = useContactEngagements(contact.id);
     const { notes, mutate: mutateNotes } = useContactNotes(contact.id);
-
-    const color = (light: ColorIndex, dark: ColorIndex) => theme.palette.mode === 'dark' ? grey[dark] : grey[light];
 
     const handleAddNoteClose = async (note?: ContactNote) => {
         console.log(note);
