@@ -152,8 +152,8 @@ export default function AdminDashboard() {
             type: 'actions',
             flex: 1,
             getActions: (params: GridRowParams) => [
-                <GridActionsCellItem icon={<EditIcon />} onClick={() => console.log('edit')} label="Edit" />,
-                <GridActionsCellItem icon={<DeleteIcon />} onClick={() => { }} label="Delete" showInMenu />
+                <GridActionsCellItem key='group-admin-action-edit' icon={<EditIcon />} onClick={() => console.log('edit')} label="Edit" />,
+                <GridActionsCellItem key='group-admin-action-delete' icon={<DeleteIcon />} onClick={() => { }} label="Delete" showInMenu />
             ],
         }
     ];

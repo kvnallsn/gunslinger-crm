@@ -129,6 +129,8 @@ function AddNoteDialog(props: AddNoteDialogProps) {
         resolver: yupResolver(ContactNoteFormSchema)
     });
 
+    const { me, loading } = useMe(session?.user.username ?? '');
+
     const handleClose = () => {
         reset();
         onClose();
@@ -161,8 +163,6 @@ function AddNoteDialog(props: AddNoteDialogProps) {
     if (!session) {
         return badSession;
     }
-
-    const { me, loading } = useMe(session.user.username);
 
     if (loading) {
         return <div>Loading...</div>

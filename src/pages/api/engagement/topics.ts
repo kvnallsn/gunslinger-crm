@@ -1,6 +1,6 @@
 import { getDatabaseConn } from '@/lib/db';
 import { Engagement } from '@/lib/models';
-import { Topic } from '@/lib/models/engagement';
+import { Topic } from '@/lib/models/topic';
 import { AppError, AppResponse, err, NewAppResponse } from "@/lib/utils/api";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession, Session } from "next-auth";

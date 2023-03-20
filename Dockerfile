@@ -46,6 +46,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/migrations ./migrations
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder /app/public ./public
 
+VOLUME /app/migrations/seed
+
 USER nextjs
 
 EXPOSE 3000

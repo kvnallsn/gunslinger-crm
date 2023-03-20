@@ -7,20 +7,20 @@ services:
       - POSTGRES_PASSWORD=crm
       - POSTGRES_DB=crm
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
+      test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
       timeout: 5s
       retries: 5
-    
+
   web:
-    image: kvnallsn/gunslinger-crm:0.1.0-alpha.04
+    image: kvnallsn/gunslinger-crm:0.1.0-rc.03
     ports:
       - "9999:3000"
     environment:
       - DATABASE_URL=postgres://crm:crm@db:5432/crm
       - NEXTAUTH_URL=http://crm.local:9999
       - NEXTAUTH_SECRET=0101010101010101010101010101010101010101010101010101010101010101
-      - GUNSLINGER_ADMIN_EMAIL=admin@test.local
+      - GUNSLINGER_ADMIN_EMAIL=admin@crm.local
       - GUNSLINGER_ADMIN_PASSWORD=p@ssw0rd
     depends_on:
       db:
