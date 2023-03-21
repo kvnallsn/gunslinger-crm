@@ -26,6 +26,10 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# set version
+ARG GSCRM_VERSION
+ENV NEXT_PUBLIC_GSCRM_VERSION=${GSCRM_VERSION:-v0.0.0-dev}
+
 RUN yarn global add pnpm && pnpm build
 
 # Production image, copy all the files and run next

@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 // UI imports
-import { AppBar, Avatar, Box, Button, Collapse, Divider, Drawer, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { AppBar, Avatar, Box, Button, Collapse, Divider, Drawer, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { DarkModeToggleButtons } from './darkmode-toggle';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ContactsIcon from '@mui/icons-material/Contacts';
@@ -17,6 +17,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { blue, grey } from '@mui/material/colors';
+import FlexColumnBox from './box-flexcolumn';
 
 const drawerWidth = 240;
 const appName = "GunslingerCRM";
@@ -31,12 +32,17 @@ const adminRoutes = [
     { display: 'Manage Groups', route: '/admin/groups', icon: <GroupIcon /> }
 ];
 
-export default function AppNavBar() {
+interface AppNavBarProps {
+    version: string;
+}
+
+export default function AppNavBar(props: AppNavBarProps) {
     const theme = useTheme();
     const router = useRouter();
     const { data: session, status } = useSession();
     const [mobileOpen, setMobileOpen] = useState<boolean>(false);
     const [adminOpen, setAdminOpen] = useState<boolean>(false);
+    const { version } = props;
 
     const isAuthenticated = status === 'authenticated';
     const isAdmin = session ? session.user.admin : false;
@@ -68,9 +74,12 @@ export default function AppNavBar() {
             bgcolor: isDark ? grey[900] : grey[100],
         }}>
             <Toolbar>
-                <Typography variant="h6" noWrap component="div">
-                    {appName}
-                </Typography>
+                <FlexColumnBox sx={{ height: '100%', width: '100%', alignItems: 'start', justifyContent: 'center' }}>
+                    <Typography variant="h6" noWrap component="div">
+                        {appName}
+                    </Typography>
+                    {isAuthenticated && <Typography variant="caption">{version}</Typography>}
+                </FlexColumnBox>
             </Toolbar>
             <Divider />
             <List disablePadding sx={{ flexGrow: 1 }}>

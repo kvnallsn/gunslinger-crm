@@ -7,6 +7,8 @@ import { createTheme } from "@mui/material";
 import React from 'react';
 import AppNavBar from '@/lib/components/app-navbar';
 
+const version = process.env.NEXT_PUBLIC_GSCRM_VERSION ?? 'v0.0.0-dev';
+
 export type ColorMode = 'light' | 'dark';
 
 export const ColorModeContext = React.createContext({
@@ -45,7 +47,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Box sx={{ display: 'flex', height: '100vh' }}>
               <CssBaseline />
-              <AppNavBar />
+              <AppNavBar version={version} />
               <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                 <Toolbar sx={{ display: { sm: 'none' } }} />
                 <Component sx={{ flexGrow: 1 }} {...pageProps} />
