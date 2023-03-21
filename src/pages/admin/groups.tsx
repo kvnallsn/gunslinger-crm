@@ -11,7 +11,7 @@ import FlexBox from '@/lib/components/box-flexrow';
 import FormAutocomplete from "@/lib/components/form-autocomplete";
 import GridToolbar from '@/lib/components/grid-toolbar';
 import { Virtuoso } from 'react-virtuoso';
-import color from '@/lib/utils/color';
+import useColor from '@/lib/utils/color';
 
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import AddIcon from '@mui/icons-material/Add';
@@ -202,7 +202,7 @@ function GroupDrawer(props: GroupDrawerProps) {
 
     return (
         <FlexColumnBox sx={{ minWidth: '400px', height: '100%' }}>
-            <FlexColumnBox sx={{ rowGap: 1, p: 1, bgcolor: color(200, 700), borderBottom: `1px solid ${color(400, 800)}` }}>
+            <FlexColumnBox sx={{ rowGap: 1, p: 1, bgcolor: useColor(200, 700), borderBottom: `1px solid ${useColor(400, 800)}` }}>
                 <FlexBox sx={{ alignItems: 'center', columnGap: 2 }}>
                     <Typography variant='h5'>{group.name}</Typography>
                 </FlexBox>

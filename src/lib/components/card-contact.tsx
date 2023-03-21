@@ -46,7 +46,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import FormTextField from './form-textfield';
 import Group from '../models/groups';
 import FlexColumnBox from './box-flexcolumn';
-import color from '../utils/color';
+import useColor from '../utils/color';
 
 interface ContactCardProps {
     contact: Contact;
@@ -417,7 +417,7 @@ export default function ContactCard(props: ContactCardProps) {
 
     return (
         <FlexColumnBox sx={{ minHeight: { md: '600px', lg: '800px' }, rowGap: 0, overflowY: 'hidden' }}>
-            <FlexColumnBox sx={{ rowGap: 1, p: 1, bgcolor: color(200, 700), borderBottom: `1px solid ${color(400, 800)}` }}>
+            <FlexColumnBox sx={{ rowGap: 1, p: 1, bgcolor: useColor(200, 700), borderBottom: `1px solid ${useColor(400, 800)}` }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', columnGap: 2 }}>
                     <Typography variant='h5'>{`${contact.first_name} ${contact.last_name}`}</Typography>
                     <Button
@@ -432,15 +432,15 @@ export default function ContactCard(props: ContactCardProps) {
                 <CardSubHeader contact={contact} />
             </FlexColumnBox>
             <Grid container spacing={0} sx={{ flexGrow: 1, overflowY: 'auto', display: { xs: 'none', md: 'flex' }, backgroundColor: theme.palette.background.paper }}>
-                <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', borderRight: `1px solid ${color(300, 800)}` }}>
-                    <Box sx={{ bgcolor: color(100, 700), borderBottom: `1px solid ${color(300, 800)}`, p: 1, textAlign: 'center' }}>
+                <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', borderRight: `1px solid ${useColor(300, 800)}` }}>
+                    <Box sx={{ bgcolor: useColor(100, 700), borderBottom: `1px solid ${useColor(300, 800)}`, p: 1, textAlign: 'center' }}>
                         <Typography variant="h6">Contact Information</Typography>
                     </Box>
                     <ContactInfoList contact={contact} />
                 </Grid>
-                <Grid item xs={12} md={4} sx={{ borderRight: `1px solid ${color(300, 800)}` }}>
+                <Grid item xs={12} md={4} sx={{ borderRight: `1px solid ${useColor(300, 800)}` }}>
                     <FlexColumnBox sx={{ height: '100%' }}>
-                        <Box sx={{ bgcolor: color(100, 700), borderBottom: `1px solid ${color(300, 800)}`, p: 1, textAlign: 'center' }}>
+                        <Box sx={{ bgcolor: useColor(100, 700), borderBottom: `1px solid ${useColor(300, 800)}`, p: 1, textAlign: 'center' }}>
                             <Typography variant="h6">Engagements</Typography>
                         </Box>
                         <Box sx={{ flexGrow: 1 }}>
@@ -449,7 +449,7 @@ export default function ContactCard(props: ContactCardProps) {
                     </FlexColumnBox>
                 </Grid>
                 <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Box sx={{ bgcolor: color(100, 700), borderBottom: `1px solid ${color(300, 800)}`, p: 1, textAlign: 'center' }}>
+                    <Box sx={{ bgcolor: useColor(100, 700), borderBottom: `1px solid ${useColor(300, 800)}`, p: 1, textAlign: 'center' }}>
                         <Typography variant="h6">Notes</Typography>
                     </Box>
                     <ContactNotes notes={notes} onCreate={() => setOpen(true)} />
