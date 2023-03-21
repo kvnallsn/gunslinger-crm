@@ -12,13 +12,13 @@ import { DataGrid, GridCallbackDetails, GridColumns, GridRowParams, MuiEvent } f
 import { Virtuoso } from 'react-virtuoso';
 
 // Icons
-import AddCommentIcon from '@mui/icons-material/AddComment';
 import AddIcon from '@mui/icons-material/Add';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import ContactCard from '@/lib/components/card-contact';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
 import { formatDistanceToNow } from 'date-fns';
 import GridToolbar from '@/lib/components/grid-toolbar';
+import EmptyOverlay from '@/lib/components/overlay-empty';
 
 const ExpandMore = styled((props: any) => {
     const { expand, ...other } = props;
@@ -30,15 +30,6 @@ const ExpandMore = styled((props: any) => {
         duration: theme.transitions.duration.shortest
     }),
 }));
-
-function NoContactsOverlay() {
-    return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', rowGap: 1, width: '100%', height: '100%' }}>
-            <ContactMailIcon sx={{ fontSize: 20 }} />
-            <Typography variant="h6">No Contacts Found</Typography>
-        </Box>
-    )
-}
 
 interface MobileCardProps {
     contact: Contact;
@@ -151,11 +142,15 @@ export default function Contacts() {
                     }}
                     components={{
                         Toolbar: GridToolbar,
-                        NoRowsOverlay: NoContactsOverlay,
+                        NoRowsOverlay: EmptyOverlay,
                     }}
                     componentsProps={{
                         toolbar: {
                             onCreate: () => router.push(`/contacts/edit`)
+                        },
+                        noRowsOverlay: {
+                            icon: <ContactMailIcon sx={{ fontSize: 40 }} />,
+                            msg: "No Contacts"
                         }
                     }}
                     onRowDoubleClick={handleClick}

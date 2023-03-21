@@ -1,17 +1,21 @@
-import { Engagement } from "@/lib/models";
-import { useEngagements } from "@/lib/utils/hooks";
+import { useRouter } from "next/router";
+import { formatDistanceToNow } from 'date-fns';
+
 import { Avatar, Box, Button, Card, CardActionArea, CardHeader, Chip, Divider, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridCallbackDetails, GridCellParams, GridColumns, GridFilterInputValue, GridFilterItem, GridRowParams, MuiEvent } from "@mui/x-data-grid";
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LaunchIcon from '@mui/icons-material/Launch';
-import { useRouter } from "next/router";
+import Diversity3Icon from '@mui/icons-material/Diversity3';
+
+import { Engagement } from "@/lib/models";
+import { useEngagements } from "@/lib/utils/hooks";
 import { EngagementOrg, EngagementTopic } from "@/lib/models/engagement";
-import { formatDistanceToNow } from 'date-fns';
 import EngagementIcon from '@/lib/components/icon-engagement';
 import { Virtuoso } from 'react-virtuoso';
 import GridToolbar from '@/lib/components/grid-toolbar';
+import EmptyOverlay from '@/lib/components/overlay-empty';
 
 interface MobileCardProps {
     engagement: Engagement;
@@ -167,11 +171,16 @@ export default function Engagements() {
                         border: 0,
                     }}
                     components={{
-                        Toolbar: GridToolbar
+                        Toolbar: GridToolbar,
+                        NoRowsOverlay: EmptyOverlay,
                     }}
                     componentsProps={{
                         toolbar: {
                             onCreate: () => router.push(`/engagements/edit`),
+                        },
+                        noRowsOverlay: {
+                            icon: <Diversity3Icon sx={{ fontSize: 40 }} />,
+                            msg: "No Engagements"
                         }
                     }}
                     initialState={{
